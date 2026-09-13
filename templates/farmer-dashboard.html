@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Farm2Door — Farmer Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Noto+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --green: #2E7D32;
+    --green-light: #4CAF50;
+    --green-dark: #1B5E20;
+    --green-tint: #E8F5E9;
+    --green-tint-2: #C8E6C9;
+    --turmeric: #F9A825;
+    --orange: #FB8C00;
+    --brown: #6D4C41;
+    --bg: #FAFAFA;
+    --white: #FFFFFF;
+    --ink: #333333;
+    --ink-soft: #6B6B6B;
+    --line: #E4E1DA;
+    --radius-lg: 22px;
+    --radius-md: 16px;
+    --radius-full: 999px;
+    --shadow: 0 6px 20px rgba(46,125,50,0.10);
+    --tap: 60px;
+  }
+
+  *{box-sizing:border-box;}
+  html{-webkit-text-size-adjust:100%;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Noto Sans', sans-serif;
+    font-size:17px;
+    line-height:1.5;
+    padding-bottom:96px;
+  }
+  h1,h2,h3,.display{
+    font-family:'Baloo 2', sans-serif;
+    color:var(--brown);
+    margin:0;
+  }
+  button{font-family:inherit;}
+  :focus-visible{outline:3px solid var(--turmeric); outline-offset:2px;}
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:0.001ms !important; transition-duration:0.001ms !important;}
+  }
+
+  /* ---------- Header ---------- */
+  .topbar{
+    position:sticky; top:0; z-index:40;
+    background:var(--green);
+    color:var(--white);
+    padding:14px 18px;
+    display:flex; align-items:center; justify-content:space-between;
+    box-shadow:0 2px 10px rgba(0,0,0,0.12);
+  }
+  .brand{display:flex; align-items:center; gap:10px;}
+  .brand-mark{
+    width:40px;height:40px;border-radius:12px;
+    background:var(--white); color:var(--green);
+    display:flex;align-items:center;justify-content:center;
+    font-size:22px; flex-shrink:0;
+  }
+  .brand-text .name{font-family:'Baloo 2'; font-weight:700; font-size:19px; line-height:1;}
+  .brand-text .tag{font-size:12px; color:var(--turmeric); font-weight:600; margin-top:2px;}
+  .top-actions{display:flex; align-items:center; gap:8px;}
+  .lang-toggle{
+    display:flex; background:rgba(255,255,255,0.16); border-radius:var(--radius-full);
+    padding:3px; gap:2px;
+  }
+  .lang-toggle button{
+    border:none; background:transparent; color:var(--white);
+    padding:6px 12px; border-radius:var(--radius-full); font-weight:700; font-size:14px;
+    cursor:pointer;
+  }
+  .lang-toggle button.active{background:var(--white); color:var(--green);}
+  .icon-btn{
+    width:42px;height:42px; border-radius:50%; border:none;
+    background:rgba(255,255,255,0.16); color:var(--white);
+    display:flex; align-items:center; justify-content:center; font-size:19px;
+    cursor:pointer; position:relative;
+  }
+  .icon-btn .dot{
+    position:absolute; top:6px; right:7px; width:9px; height:9px;
+    background:var(--orange); border-radius:50%; border:2px solid var(--green);
+  }
+
+  main{max-width:920px; margin:0 auto; padding:16px;}
+
+  /* ---------- Greeting ---------- */
+  .greeting{
+    background:linear-gradient(135deg, var(--green-tint), var(--white));
+    border:1px solid var(--green-tint-2);
+    border-radius:var(--radius-lg);
+    padding:18px 20px;
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    margin-bottom:16px;
+  }
+  .greeting h1{font-size:22px;}
+  .greeting p{margin:4px 0 0; color:var(--ink-soft); font-size:14px;}
+  .weather-chip{
+    background:var(--white); border-radius:var(--radius-md);
+    padding:10px 14px; text-align:center; box-shadow:var(--shadow);
+    flex-shrink:0;
+  }
+  .weather-chip .t{font-family:'Baloo 2'; font-size:22px; font-weight:700; color:var(--green);}
+  .weather-chip .d{font-size:12px; color:var(--ink-soft);}
+
+  /* ---------- Section heading ---------- */
+  .section-head{display:flex; align-items:baseline; justify-content:space-between; margin:26px 0 12px;}
+  .section-head h2{font-size:19px;}
+  .section-head a{color:var(--green); font-weight:700; font-size:14px; text-decoration:none; cursor:pointer;}
+
+  /* ---------- Quick actions ---------- */
+  .quick-grid{
+    display:grid; grid-template-columns:repeat(4, 1fr); gap:12px;
+  }
+  .quick-tile{
+    background:var(--white); border:2px solid var(--green-tint-2);
+    border-radius:var(--radius-lg); padding:16px 8px;
+    display:flex; flex-direction:column; align-items:center; gap:8px;
+    cursor:pointer; text-align:center; min-height:var(--tap);
+    transition:transform .15s ease, box-shadow .15s ease, background .15s ease;
+  }
+  .quick-tile:hover{transform:translateY(-2px); box-shadow:var(--shadow); background:var(--green-tint);}
+  .quick-tile .ico{
+    width:52px;height:52px;border-radius:50%;
+    background:var(--green-tint); color:var(--green);
+    display:flex;align-items:center;justify-content:center; font-size:26px;
+  }
+  .quick-tile.primary{background:var(--green); border-color:var(--green);}
+  .quick-tile.primary .ico{background:rgba(255,255,255,0.2); color:var(--white);}
+  .quick-tile.primary span{color:var(--white);}
+  .quick-tile span{font-weight:700; font-size:13.5px; color:var(--brown);}
+
+  /* ---------- Crop cards (horizontal scroll) ---------- */
+  .scroll-row{
+    display:flex; gap:14px; overflow-x:auto; padding-bottom:6px;
+    scroll-snap-type:x proximity;
+  }
+  .crop-card{
+    flex:0 0 168px; scroll-snap-align:start;
+    background:var(--white); border-radius:var(--radius-lg);
+    border:1px solid var(--line); box-shadow:var(--shadow);
+    overflow:hidden;
+  }
+  .crop-card .art{
+    height:96px; background:var(--green-tint);
+    display:flex; align-items:center; justify-content:center; font-size:44px;
+  }
+  .crop-card .body{padding:12px;}
+  .crop-card .name{font-weight:700; color:var(--brown); font-size:15px;}
+  .crop-card .qty{font-size:13px; color:var(--ink-soft); margin:2px 0 8px;}
+  .badge{
+    display:inline-flex; align-items:center; gap:5px;
+    font-size:12px; font-weight:700; padding:4px 10px; border-radius:var(--radius-full);
+  }
+  .badge.active{background:var(--green-tint); color:var(--green-dark);}
+  .badge.low{background:#FFF3E0; color:var(--orange);}
+  .badge.sold{background:#F1F1F1; color:var(--ink-soft);}
+  .badge.pending{background:#FFF3E0; color:var(--orange);}
+  .badge.delivered{background:var(--green-tint); color:var(--green-dark);}
+  .badge.dot::before{content:''; width:7px; height:7px; border-radius:50%; background:currentColor;}
+
+  .add-crop-card{
+    flex:0 0 168px; border:2px dashed var(--green-tint-2); border-radius:var(--radius-lg);
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px;
+    color:var(--green); cursor:pointer; min-height:170px; background:var(--white);
+  }
+  .add-crop-card .ico{
+    width:44px;height:44px;border-radius:50%; background:var(--green-tint);
+    display:flex; align-items:center; justify-content:center; font-size:22px;
+  }
+  .add-crop-card span{font-weight:700; font-size:13.5px;}
+
+  /* ---------- Orders ---------- */
+  .order-card{
+    background:var(--white); border:1px solid var(--line); border-radius:var(--radius-lg);
+    padding:14px 16px; display:flex; align-items:center; gap:14px; margin-bottom:12px;
+    box-shadow:var(--shadow);
+  }
+  .order-card .art{
+    width:52px;height:52px;border-radius:14px; background:var(--green-tint);
+    display:flex; align-items:center; justify-content:center; font-size:26px; flex-shrink:0;
+  }
+  .order-card .info{flex:1; min-width:0;}
+  .order-card .buyer{font-weight:700; color:var(--brown); font-size:15px;}
+  .order-card .meta{font-size:13.5px; color:var(--ink-soft); margin-top:2px;}
+  .order-actions{display:flex; gap:8px; flex-shrink:0;}
+  .btn{
+    border:none; border-radius:var(--radius-full); font-weight:700; cursor:pointer;
+    padding:10px 18px; font-size:14px; display:inline-flex; align-items:center; gap:6px;
+    transition:filter .15s ease, transform .1s ease;
+  }
+  .btn:active{transform:scale(0.97);}
+  .btn-accept{background:var(--green); color:var(--white);}
+  .btn-accept:hover{background:var(--green-light);}
+  .btn-ghost{background:var(--white); color:var(--brown); border:1.5px solid var(--line);}
+  .btn-icon-only{width:44px; height:44px; padding:0; border-radius:50%; justify-content:center;}
+
+  /* ---------- Earnings ---------- */
+  .earnings-card{
+    background:var(--white); border-radius:var(--radius-lg); border:1px solid var(--line);
+    box-shadow:var(--shadow); padding:20px;
+  }
+  .earnings-top{display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:14px;}
+  .earnings-amt{font-family:'Baloo 2'; font-size:30px; font-weight:800; color:var(--green-dark);}
+  .earnings-sub{font-size:13px; color:var(--ink-soft);}
+  .progress-track{height:12px; background:var(--green-tint); border-radius:var(--radius-full); overflow:hidden;}
+  .progress-fill{height:100%; background:linear-gradient(90deg, var(--green), var(--green-light)); border-radius:var(--radius-full);}
+  .progress-labels{display:flex; justify-content:space-between; font-size:12.5px; color:var(--ink-soft); margin-top:8px;}
+
+  /* ---------- Floating voice button ---------- */
+  .mic-fab{
+    position:fixed; right:18px; bottom:86px; z-index:50;
+    width:64px; height:64px; border-radius:50%;
+    background:var(--turmeric); color:var(--brown);
+    border:none; box-shadow:0 8px 22px rgba(249,168,37,0.5);
+    font-size:26px; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .mic-fab::after{
+    content:''; position:absolute; inset:0; border-radius:50%;
+    box-shadow:0 0 0 0 rgba(249,168,37,0.6);
+    animation:pulse 2.4s infinite;
+  }
+  @keyframes pulse{
+    0%{box-shadow:0 0 0 0 rgba(249,168,37,0.55);}
+    70%{box-shadow:0 0 0 16px rgba(249,168,37,0);}
+    100%{box-shadow:0 0 0 0 rgba(249,168,37,0);}
+  }
+
+  /* ---------- Bottom nav ---------- */
+  .bottom-nav{
+    position:fixed; bottom:0; left:0; right:0; z-index:45;
+    background:var(--white); border-top:1px solid var(--line);
+    display:flex; justify-content:space-around; padding:8px 6px calc(8px + env(safe-area-inset-bottom));
+  }
+  .nav-item{
+    background:none; border:none; display:flex; flex-direction:column; align-items:center; gap:3px;
+    color:var(--ink-soft); font-size:11.5px; font-weight:600; cursor:pointer; padding:6px 10px; min-width:64px;
+  }
+  .nav-item .ico{font-size:21px;}
+  .nav-item.active{color:var(--green);}
+
+  /* ---------- Modal ---------- */
+  .overlay{
+    position:fixed; inset:0; background:rgba(50,40,20,0.45); z-index:60;
+    display:none; align-items:flex-end; justify-content:center;
+  }
+  .overlay.show{display:flex;}
+  .sheet{
+    background:var(--white); width:100%; max-width:520px;
+    border-radius:26px 26px 0 0; padding:22px 20px calc(24px + env(safe-area-inset-bottom));
+    max-height:88vh; overflow-y:auto;
+    animation:slideUp .28s ease;
+  }
+  @keyframes slideUp{from{transform:translateY(30px); opacity:0;} to{transform:translateY(0); opacity:1;}}
+  .sheet-head{display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;}
+  .sheet-head h2{font-size:20px;}
+  .close-x{background:var(--green-tint); border:none; width:36px; height:36px; border-radius:50%; font-size:16px; color:var(--brown); cursor:pointer;}
+
+  .crop-pick-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:18px;}
+  .crop-pick{
+    border:2px solid var(--line); border-radius:16px; background:var(--white);
+    padding:12px 4px; display:flex; flex-direction:column; align-items:center; gap:6px;
+    cursor:pointer; font-size:12px; font-weight:600; color:var(--ink);
+  }
+  .crop-pick .e{font-size:26px;}
+  .crop-pick.selected{border-color:var(--green); background:var(--green-tint);}
+
+  .field{margin-bottom:16px;}
+  .field label{display:block; font-weight:700; color:var(--brown); font-size:14.5px; margin-bottom:8px;}
+  .stepper{display:flex; align-items:center; gap:14px;}
+  .stepper button{
+    width:48px; height:48px; border-radius:50%; border:none; background:var(--green-tint);
+    color:var(--green); font-size:22px; font-weight:700; cursor:pointer;
+  }
+  .stepper .val{font-family:'Baloo 2'; font-size:22px; font-weight:700; min-width:90px; text-align:center;}
+  .input-with-mic{display:flex; align-items:center; gap:10px;}
+  .input-with-mic input{
+    flex:1; padding:14px 16px; border-radius:14px; border:1.5px solid var(--line);
+    font-size:16px; font-family:inherit;
+  }
+  .mini-mic{
+    width:48px; height:48px; border-radius:50%; border:none; background:var(--turmeric);
+    color:var(--brown); font-size:18px; cursor:pointer; flex-shrink:0;
+  }
+  .submit-btn{
+    width:100%; background:var(--green); color:var(--white); border:none; border-radius:var(--radius-full);
+    padding:16px; font-size:17px; font-weight:700; cursor:pointer; margin-top:6px;
+  }
+  .submit-btn:hover{background:var(--green-light);}
+
+  .voice-modal{text-align:center; padding-top:8px;}
+  .voice-orb{
+    width:110px; height:110px; border-radius:50%; margin:12px auto 18px;
+    background:radial-gradient(circle at 35% 30%, var(--turmeric), var(--orange));
+    display:flex; align-items:center; justify-content:center; font-size:44px; color:var(--white);
+    animation:orb 1.4s ease-in-out infinite;
+  }
+  @keyframes orb{0%,100%{transform:scale(1);} 50%{transform:scale(1.08);}}
+  .voice-hint{color:var(--ink-soft); font-size:14.5px; margin-bottom:20px;}
+  .voice-examples{display:flex; flex-direction:column; gap:8px; margin-bottom:20px;}
+  .voice-examples span{
+    background:var(--green-tint); color:var(--green-dark); padding:10px 14px;
+    border-radius:14px; font-size:14px; font-weight:600;
+  }
+
+  /* ---------- Toast ---------- */
+  .toast{
+    position:fixed; top:14px; left:50%; transform:translateX(-50%) translateY(-140%);
+    background:var(--green-dark); color:var(--white); padding:13px 22px; border-radius:var(--radius-full);
+    font-weight:700; font-size:14.5px; z-index:80; box-shadow:0 8px 20px rgba(0,0,0,0.2);
+    display:flex; align-items:center; gap:8px; transition:transform .35s ease; max-width:90%;
+  }
+  .toast.show{transform:translateX(-50%) translateY(0);}
+
+  @media (min-width:600px){
+    .quick-grid{grid-template-columns:repeat(4,1fr);}
+  }
+  @media (max-width:420px){
+    .quick-tile span{font-size:12px;}
+    .earnings-amt{font-size:26px;}
+  }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <a class="brand" href="{% url 'home' %}" style="text-decoration:none;color:inherit;">
+    <div class="brand-mark">🌾</div>
+    <div class="brand-text">
+      <div class="name">Farm2Door</div>
+      <div class="tag" data-i18n="tagline">Kheth se seedha ghar tak</div>
+    </div>
+  </a>
+  <div class="top-actions">
+    <div class="lang-toggle">
+      <button class="active" id="lang-en">EN</button>
+      <button id="lang-hi">हिं</button>
+    </div>
+    <button class="icon-btn" aria-label="Notifications" onclick="window.location.href='{% url 'notifications' %}'">
+      🔔<span class="dot"></span>
+    </button>
+  </div>
+</header>
+
+<main>
+
+  <section class="greeting">
+    <div>
+      <h1 data-i18n="greet">Namaste, Ramesh Ji 👋</h1>
+      <p data-i18n="greetSub">Tuesday, 9 September · Village: Barwaha</p>
+    </div>
+    <div class="weather-chip">
+      <div class="t">32°C</div>
+      <div class="d" data-i18n="weatherNote">Sunny, good for harvest</div>
+    </div>
+  </section>
+
+  <div class="section-head">
+    <h2 data-i18n="quickTitle">What do you want to do?</h2>
+  </div>
+  <div class="quick-grid">
+    <div class="quick-tile primary" onclick="openAddListing()">
+      <div class="ico">➕</div>
+      <span data-i18n="qAdd">Add Listing</span>
+    </div>
+    <div class="quick-tile" onclick="scrollToId('orders')">
+      <div class="ico">📦</div>
+      <span data-i18n="qOrders">Manage Orders</span>
+    </div>
+    <div class="quick-tile" onclick="scrollToId('earnings')">
+      <div class="ico">💰</div>
+      <span data-i18n="qEarn">My Earnings</span>
+    </div>
+    <div class="quick-tile" onclick="toast('Calling helpline… 1800-000-000')">
+      <div class="ico">☎️</div>
+      <span data-i18n="qHelp">Get Help</span>
+    </div>
+  </div>
+
+  <div class="section-head">
+    <h2 data-i18n="cropsTitle">My Crops</h2>
+    <a data-i18n="viewAll">View all</a>
+  </div>
+  <div class="scroll-row" id="crop-row">
+    <div class="crop-card">
+      <div class="art">🍅</div>
+      <div class="body">
+        <div class="name">Tomato</div>
+        <div class="qty">120 kg · ₹18/kg</div>
+        <span class="badge active dot" data-i18n="stActive">Active</span>
+      </div>
+    </div>
+    <div class="crop-card">
+      <div class="art">🧅</div>
+      <div class="body">
+        <div class="name">Onion</div>
+        <div class="qty">300 kg · ₹22/kg</div>
+        <span class="badge active dot" data-i18n="stActive">Active</span>
+      </div>
+    </div>
+    <div class="crop-card">
+      <div class="art">🌾</div>
+      <div class="body">
+        <div class="name">Wheat</div>
+        <div class="qty">40 kg left · ₹28/kg</div>
+        <span class="badge low dot" data-i18n="stLow">Low Stock</span>
+      </div>
+    </div>
+    <div class="crop-card">
+      <div class="art">🥔</div>
+      <div class="body">
+        <div class="name">Potato</div>
+        <div class="qty">0 kg · ₹15/kg</div>
+        <span class="badge sold dot" data-i18n="stSold">Sold Out</span>
+      </div>
+    </div>
+    <div class="add-crop-card" onclick="openAddListing()">
+      <div class="ico">➕</div>
+      <span data-i18n="addNew">Add New Crop</span>
+    </div>
+  </div>
+
+  <div class="section-head" id="orders">
+    <h2 data-i18n="ordersTitle">Orders to Manage</h2>
+    <a data-i18n="viewAll">View all</a>
+  </div>
+
+  <div class="order-card">
+    <div class="art">🍅</div>
+    <div class="info">
+      <div class="buyer">Sunita Traders</div>
+      <div class="meta">Tomato · 40 kg · <span class="badge pending dot" data-i18n="stPending">Pending</span></div>
+    </div>
+    <div class="order-actions">
+      <button class="btn btn-accept" onclick="acceptOrder(this)" data-i18n="accept">Accept</button>
+      <button class="btn btn-ghost btn-icon-only" aria-label="Call buyer" onclick="toast('Calling Sunita Traders…')">📞</button>
+    </div>
+  </div>
+
+  <div class="order-card">
+    <div class="art">🧅</div>
+    <div class="info">
+      <div class="buyer">Green Basket Co-op</div>
+      <div class="meta">Onion · 100 kg · <span class="badge pending dot" data-i18n="stPending">Pending</span></div>
+    </div>
+    <div class="order-actions">
+      <button class="btn btn-accept" onclick="acceptOrder(this)" data-i18n="accept">Accept</button>
+      <button class="btn btn-ghost btn-icon-only" aria-label="Call buyer" onclick="toast('Calling Green Basket Co-op…')">📞</button>
+    </div>
+  </div>
+
+  <div class="order-card">
+    <div class="art">🌾</div>
+    <div class="info">
+      <div class="buyer">Anjali Devi</div>
+      <div class="meta">Wheat · 15 kg · <span class="badge delivered dot" data-i18n="stDelivered">Delivered</span></div>
+    </div>
+    <div class="order-actions">
+      <button class="btn btn-ghost btn-icon-only" aria-label="Order details" onclick="toast('Order delivered on 6 Sep')">ℹ️</button>
+    </div>
+  </div>
+
+  <div class="section-head" id="earnings">
+    <h2 data-i18n="earnTitle">This Month's Earnings</h2>
+  </div>
+  <div class="earnings-card">
+    <div class="earnings-top">
+      <div>
+        <div class="earnings-amt">₹18,400</div>
+        <div class="earnings-sub" data-i18n="earnSub">Goal: ₹25,000 this month</div>
+      </div>
+      <div class="earnings-sub">74%</div>
+    </div>
+    <div class="progress-track"><div class="progress-fill" style="width:74%"></div></div>
+    <div class="progress-labels">
+      <span data-i18n="earnPaid">₹18,400 received</span>
+      <span data-i18n="earnLeft">₹6,600 to go</span>
+    </div>
+  </div>
+
+</main>
+
+<button class="mic-fab" aria-label="Voice assistant" onclick="openVoice()">🎤</button>
+
+<nav class="bottom-nav">
+  <button class="nav-item active"><span class="ico">🏠</span><span data-i18n="navHome">Home</span></button>
+  <button class="nav-item" onclick="scrollToId('crop-row')"><span class="ico">🌱</span><span data-i18n="navCrops">Crops</span></button>
+  <button class="nav-item" onclick="scrollToId('orders')"><span class="ico">📦</span><span data-i18n="navOrders">Orders</span></button>
+  <button class="nav-item" onclick="toast('Opening your profile')"><span class="ico">👤</span><span data-i18n="navProfile">Profile</span></button>
+</nav>
+
+<!-- Add Listing Modal -->
+<div class="overlay" id="addListingOverlay">
+  <div class="sheet">
+    <div class="sheet-head">
+      <h2 data-i18n="addSheetTitle">Add a Crop to Sell</h2>
+      <button class="close-x" onclick="closeModal('addListingOverlay')">✕</button>
+    </div>
+
+    <div class="field">
+      <label data-i18n="pickCrop">Pick your crop</label>
+      <div class="crop-pick-grid" id="cropPickGrid">
+        <div class="crop-pick" onclick="pickCrop(this)"><span class="e">🍅</span>Tomato</div>
+        <div class="crop-pick" onclick="pickCrop(this)"><span class="e">🧅</span>Onion</div>
+        <div class="crop-pick" onclick="pickCrop(this)"><span class="e">🥔</span>Potato</div>
+        <div class="crop-pick" onclick="pickCrop(this)"><span class="e">🌾</span>Wheat</div>
+        <div class="crop-pick" onclick="pickCrop(this)"><span class="e">🌽</span>Maize</div>
+        <div class="crop-pick" onclick="pickCrop(this)"><span class="e">🥬</span>Cabbage</div>
+        <div class="crop-pick" onclick="pickCrop(this)"><span class="e">🥭</span>Mango</div>
+        <div class="crop-pick" onclick="pickCrop(this)"><span class="e">➕</span>More</div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label data-i18n="howMuch">How much do you have? (kg)</label>
+      <div class="stepper">
+        <button onclick="changeQty(-10)">−</button>
+        <div class="val" id="qtyVal">50 kg</div>
+        <button onclick="changeQty(10)">+</button>
+      </div>
+    </div>
+
+    <div class="field">
+      <label data-i18n="priceLabel">Price per kg (₹)</label>
+      <div class="input-with-mic">
+        <input type="number" id="priceInput" placeholder="e.g. 20" inputmode="numeric">
+        <button class="mini-mic" aria-label="Speak price" onclick="toast('Listening for price…')">🎤</button>
+      </div>
+    </div>
+
+    <button class="submit-btn" onclick="submitListing()" data-i18n="postListing">Post Listing</button>
+  </div>
+</div>
+
+<!-- Voice Assistant Modal -->
+<div class="overlay" id="voiceOverlay">
+  <div class="sheet voice-modal">
+    <div class="sheet-head" style="justify-content:flex-end;">
+      <button class="close-x" onclick="closeModal('voiceOverlay')">✕</button>
+    </div>
+    <div class="voice-orb">🎤</div>
+    <h2 data-i18n="voiceTitle">I'm listening…</h2>
+    <p class="voice-hint" data-i18n="voiceHint">Speak in Hindi or English. Say what you want to do.</p>
+    <div class="voice-examples">
+      <span data-i18n="ex1">"Add 50 kg tomato at 20 rupees"</span>
+      <span data-i18n="ex2">"Show my orders"</span>
+      <span data-i18n="ex3">"What is today's mandi price?"</span>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast">✅ <span id="toastMsg">Done</span></div>
+
+<script>
+  // ---------- i18n ----------
+  const dict = {
+    en: {
+      tagline:"From Farm to Family, Fairly", greet:"Namaste, Ramesh Ji 👋", greetSub:"Tuesday, 9 September · Village: Barwaha",
+      weatherNote:"Sunny, good for harvest", quickTitle:"What do you want to do?",
+      qAdd:"Add Listing", qOrders:"Manage Orders", qEarn:"My Earnings", qHelp:"Get Help",
+      cropsTitle:"My Crops", viewAll:"View all", stActive:"Active", stLow:"Low Stock", stSold:"Sold Out",
+      addNew:"Add New Crop", ordersTitle:"Orders to Manage", stPending:"Pending", stDelivered:"Delivered",
+      accept:"Accept", earnTitle:"This Month's Earnings", earnSub:"Goal: ₹25,000 this month",
+      earnPaid:"₹18,400 received", earnLeft:"₹6,600 to go",
+      navHome:"Home", navCrops:"Crops", navOrders:"Orders", navProfile:"Profile",
+      addSheetTitle:"Add a Crop to Sell", pickCrop:"Pick your crop", howMuch:"How much do you have? (kg)",
+      priceLabel:"Price per kg (₹)", postListing:"Post Listing",
+      voiceTitle:"I'm listening…", voiceHint:"Speak in Hindi or English. Say what you want to do.",
+      ex1:'"Add 50 kg tomato at 20 rupees"', ex2:'"Show my orders"', ex3:'"What is today\\'s mandi price?"'
+    },
+    hi: {
+      tagline:"खेत से घर तक, ईमानदारी से", greet:"नमस्ते, रमेश जी 👋", greetSub:"मंगलवार, 9 सितंबर · गाँव: बरवाहा",
+      weatherNote:"धूप है, कटाई के लिए अच्छा", quickTitle:"आप क्या करना चाहते हैं?",
+      qAdd:"फसल जोड़ें", qOrders:"ऑर्डर देखें", qEarn:"मेरी कमाई", qHelp:"मदद लें",
+      cropsTitle:"मेरी फसलें", viewAll:"सभी देखें", stActive:"उपलब्ध", stLow:"कम बचा है", stSold:"खत्म",
+      addNew:"नई फसल जोड़ें", ordersTitle:"ऑर्डर संभालें", stPending:"प्रतीक्षा में", stDelivered:"डिलीवर हुआ",
+      accept:"स्वीकार करें", earnTitle:"इस महीने की कमाई", earnSub:"लक्ष्य: ₹25,000 इस महीने",
+      earnPaid:"₹18,400 मिले", earnLeft:"₹6,600 बाकी",
+      navHome:"होम", navCrops:"फसलें", navOrders:"ऑर्डर", navProfile:"प्रोफ़ाइल",
+      addSheetTitle:"बेचने के लिए फसल जोड़ें", pickCrop:"अपनी फसल चुनें", howMuch:"आपके पास कितना है? (किलो)",
+      priceLabel:"प्रति किलो कीमत (₹)", postListing:"फसल लिस्ट करें",
+      voiceTitle:"मैं सुन रहा हूँ…", voiceHint:"हिंदी या अंग्रेज़ी में बोलें। बताएं आप क्या करना चाहते हैं।",
+      ex1:'"50 किलो टमाटर 20 रुपये में जोड़ो"', ex2:'"मेरे ऑर्डर दिखाओ"', ex3:'"आज मंडी भाव क्या है?"'
+    }
+  };
+  function setLang(l){
+    document.querySelectorAll('[data-i18n]').forEach(el=>{
+      const k = el.getAttribute('data-i18n');
+      if(dict[l][k]) el.textContent = dict[l][k];
+    });
+    document.getElementById('lang-en').classList.toggle('active', l==='en');
+    document.getElementById('lang-hi').classList.toggle('active', l==='hi');
+    document.documentElement.lang = l;
+  }
+  document.getElementById('lang-en').onclick = ()=>setLang('en');
+  document.getElementById('lang-hi').onclick = ()=>setLang('hi');
+
+  // ---------- helpers ----------
+  function scrollToId(id){document.getElementById(id).scrollIntoView({behavior:'smooth', block:'start'});}
+  function openModal(id){document.getElementById(id).classList.add('show');}
+  function closeModal(id){document.getElementById(id).classList.remove('show');}
+  function openAddListing(){openModal('addListingOverlay');}
+  function openVoice(){
+    openModal('voiceOverlay');
+    setTimeout(()=>{ if(document.getElementById('voiceOverlay').classList.contains('show')){
+      closeModal('voiceOverlay'); toast('Heard: "Add 50 kg tomato at 20 rupees"');
+    }}, 3200);
+  }
+
+  let toastTimer;
+  function toast(msg){
+    const t = document.getElementById('toast');
+    document.getElementById('toastMsg').textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(()=>t.classList.remove('show'), 2800);
+  }
+
+  function pickCrop(el){
+    document.querySelectorAll('.crop-pick').forEach(c=>c.classList.remove('selected'));
+    el.classList.add('selected');
+  }
+
+  let qty = 50;
+  function changeQty(delta){
+    qty = Math.max(0, qty + delta);
+    document.getElementById('qtyVal').textContent = qty + ' kg';
+  }
+
+  function submitListing(){
+    const selected = document.querySelector('.crop-pick.selected');
+    const cropName = selected ? selected.textContent.trim() : 'Crop';
+    const price = document.getElementById('priceInput').value || '—';
+    closeModal('addListingOverlay');
+    toast(`${cropName} listed: ${qty} kg at ₹${price}/kg`);
+  }
+
+  function acceptOrder(btn){
+    const card = btn.closest('.order-card');
+    const badge = card.querySelector('.badge');
+    badge.textContent = 'Accepted';
+    badge.className = 'badge active dot';
+    btn.remove();
+    toast('Order accepted — buyer notified');
+  }
+</script>
+</body>
+</html>

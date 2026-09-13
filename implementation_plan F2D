@@ -1,0 +1,143 @@
+# Implementation Plan: Integrate Farm2Door Frontend into Django
+
+Inspect the current static frontend structure and integrate all 10 pages into a clean Django application with appropriate directory organization, view functions, URL naming, and template routing—preserving all design and client-side interactions without adding authentication logic.
+
+---
+
+## 1. Project Inspection & Required Changes
+
+### Current State
+The project workspace contains 10 static HTML files and a `README.md`:
+- `index.html` (Public Landing Page)
+- `login.html` (Role-based Login: Farmer, Consumer, Bulk, Delivery, Admin)
+- `signin.html` (Phone + OTP Sign-in)
+- `marketplace.html` (Consumer / Bulk Marketplace with cart drawer)
+- `checkout.html` (Checkout flow & Order confirmation)
+- `farmer-dashboard.html` (Farmer inventory, listings & payouts)
+- `delivery-dashboard.html` (Delivery partner route & task management)
+- `admin-dashboard.html` (Platform oversight & analytics)
+- `traceability.html` (Supply-chain QR batch tracking)
+- `notifications.html` (Unified alert center)
+
+All styling (CSS), icons (inline SVG), and behaviors (vanilla JS) are self-contained inside these files, referencing Google Fonts via CDN. Currently, page jumps and JavaScript redirects use hardcoded `.html` relative links (e.g., `href="marketplace.html"`, `window.location.href="checkout.html"`).
+
+### Required Changes
+1. **Django Project Initialization**:
+   - Create a standard Django project (`farm2door_project`) and a main application (`core`).
+   - Configure `settings.py` for template discovery and static file handling.
+2. **Directory Organization**:
+   - Create `templates/` and move the 10 HTML files into it.
+   - Create `static/` with `css/`, `js/`, and `images/` subdirectories.
+3. **Views & Routing**:
+   - Implement clean render views in `core/views.py`.
+   - Wire application URLs in `core/urls.py` and connect them to `farm2door_project/urls.py`.
+4. **URL Tag Modernization**:
+   - Replace static `.html` hyperlinks and JavaScript redirects with Django `{% url '...' %}` tags, preserving query parameters (e.g., `?role=farmer`, `?mode=bulk`, `?qr=...`) and anchors (e.g., `#earnings`).
+5. **Preservation of Design & Logic**:
+   - Zero changes to CSS styles, HTML structures, or client-side JavaScript logic.
+   - No mock authentication or fake security added.
+
+---
+
+## 2. Proposed URL & View Mappings
+
+| Page / Route | View Function | URL Name | Path |
+|---|---|---|---|
+| Landing / Home | `home` | `'home'` | `""` |
+| Role Login | `login_view` | `'login'` | `"login/"` |
+| OTP Sign-in | `signin_view` | `'signin'` | `"signin/"` |
+| Marketplace | `marketplace_view` | `'marketplace'` | `"marketplace/"` |
+| Checkout | `checkout_view` | `'checkout'` | `"checkout/"` |
+| Farmer Dashboard | `farmer_dashboard_view` | `'farmer_dashboard'` | `"farmer-dashboard/"` |
+| Delivery Dashboard | `delivery_dashboard_view` | `'delivery_dashboard'` | `"delivery-dashboard/"` |
+| Admin Dashboard | `admin_dashboard_view` | `'admin_dashboard'` | `"admin-dashboard/"` |
+| Traceability | `traceability_view` | `'traceability'` | `"traceability/"` |
+| Notifications | `notifications_view` | `'notifications'` | `"notifications/"` |
+
+---
+
+## 3. Proposed Changes
+
+### Django Setup & Configuration
+
+#### [NEW] [manage.py](file:///c:/Users/Lenovo/OneDrive/Desktop/antigravity/Farn2Door/manage.py)
+Django CLI entry point.
+
+#### [NEW] [farm2door_project/settings.py](file:///c:/Users/Lenovo/OneDrive/Desktop/antigravity/Farn2Door/farm2door_project/settings.py)
+- Register `core` in `INSTALLED_APPS`.
+- Configure `TEMPLATES['DIRS'] = [BASE_DIR / 'templates']`.
+- Configure `STATIC_URL = '/static/'` and `STATICFILES_DIRS = [BASE_DIR / 'static']`.
+
+#### [NEW] [farm2door_project/urls.py](file:///c:/Users/Lenovo/OneDrive/Desktop/antigravity/Farn2Door/farm2door_project/urls.py)
+Include `core.urls`.
+
+#### [NEW] [core/views.py](file:///c:/Users/Lenovo/OneDrive/Desktop/antigravity/Farn2Door/core/views.py)
+Define the 10 view functions rendering their respective templates.
+
+#### [NEW] [core/urls.py](file:///c:/Users/Lenovo/OneDrive/Desktop/antigravity/Farn2Door/core/urls.py)
+Define URL patterns mapping paths to views with explicit `name` attributes.
+
+---
+
+### Templates Organization & Route Link Updates
+
+#### [NEW] [templates/index.html](file:///c:/Users/Lenovo/OneDrive/Desktop/antigravity/Farn2Door/templates/index.html)
+- Update links to `{% url 'home' %}`, `{% url 'marketplace' %}`, `{% url 'login' %}?role=...`, `{% url 'traceability' %}`, `{% url 'farmer_dashboard' %}#earnings`.
+
+#### [NEW] [templates/login.html](file:///c:/Users/Lenovo/OneDrive/Desktop/antigravity/Farn2Door/templates/login.html)
+- Update brand link to `{% url 'home' %}`.
+- Update create account link and OTP redirect to `{% url 'signin' %}`.
+- Update role redirect map in JS to use `{% url 'farmer_dashboard' %}`, `{% url 'marketplace' %}`, `{% url 'delivery_dashboard' %}`, `{% url 'admin_dashboard' %}`.
+
+#### [NEW] [templates/signin.html](file:///c:/Users/Lenovo/OneDrive/Desktop/antigravity/Farn2Door/templates/signin.html)
+- Update OTP success redirect to `{% url 'marketplace' %}`.
+
+#### [NEW] [templates/marketplace.html](file:///c:/Users/Lenovo/OneDrive/Desktop/antigravity/Farn2Door/templates/marketplace.html)
+- Update header brand link to `{% url 'home' %}`.
+- Update notifications button action to `{% url 'notifications' %}`.
+- Update footer links and checkout redirect to `{% url 'checkout' %}`.
+
+#### [NEW] [templates/checkout.html](file:///c:/Users/Lenovo/OneDrive/Desktop/antigravity/Farn2Door/templates/checkout.html)
+- Update brand link to `{% url 'home' %}`.
+- Update tracking redirect to `{% url 'traceability' %}?qr=` and continue shopping redirect to `{% url 'marketplace' %}`.
+
+#### [NEW] [templates/farmer_dashboard.html](file:///c:/Users/Lenovo/OneDrive/Desktop/antigravity/Farn2Door/templates/farmer_dashboard.html)
+- Update brand link to `{% url 'home' %}`.
+- Update notifications button action to `{% url 'notifications' %}`.
+
+#### [NEW] [templates/delivery_dashboard.html](file:///c:/Users/Lenovo/OneDrive/Desktop/antigravity/Farn2Door/templates/delivery_dashboard.html)
+- Update brand link to `{% url 'home' %}`.
+- Update notifications button action to `{% url 'notifications' %}`.
+- Update "View trace" modal action to `{% url 'traceability' %}?qr=`.
+
+#### [NEW] [templates/admin_dashboard.html](file:///c:/Users/Lenovo/OneDrive/Desktop/antigravity/Farn2Door/templates/admin_dashboard.html)
+- Update brand link to `{% url 'home' %}`.
+- Update notifications button action to `{% url 'notifications' %}`.
+
+#### [NEW] [templates/traceability.html](file:///c:/Users/Lenovo/OneDrive/Desktop/antigravity/Farn2Door/templates/traceability.html)
+- Update brand link to `{% url 'home' %}`.
+- Update footer links to `{% url 'marketplace' %}`, `{% url 'traceability' %}`, and `{% url 'login' %}?role=farmer`.
+
+#### [NEW] [templates/notifications.html](file:///c:/Users/Lenovo/OneDrive/Desktop/antigravity/Farn2Door/templates/notifications.html)
+- Update brand link to `{% url 'home' %}`.
+
+---
+
+## 4. Verification Plan
+
+### Automated Checks
+- Run Django system checks:
+  ```powershell
+  python manage.py check
+  ```
+- Run tests verifying HTTP 200 OK responses for all routes and proper template rendering:
+  ```powershell
+  python manage.py test
+  ```
+
+### Manual Verification
+- Start local development server:
+  ```powershell
+  python manage.py runserver
+  ```
+- Navigate through all 10 pages in the browser to verify full page flow and visual appearance.

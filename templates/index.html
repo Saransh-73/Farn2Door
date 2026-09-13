@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Farm2Door — From Farm to Family, Fairly.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --farm-green: #2E7D32;
+    --farm-green-light: #4C9A51;
+    --turmeric: #F9A825;
+    --produce-orange: #FB8C00;
+    --earthy-brown: #6D4C41;
+    --bg: #FAFAFA;
+    --soil: #3B2A20;
+    --sage: #EEF3EA;
+    --cream: #FFF7E8;
+    --ink: #333333;
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body{
+    margin:0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Work Sans", sans-serif;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1,h2,h3,.display{
+    font-family: "Fraunces", serif;
+    color: var(--earthy-brown);
+    margin: 0;
+    font-weight: 600;
+  }
+
+  a { color: inherit; }
+  img, svg { display:block; max-width:100%; }
+  ul { margin:0; padding:0; list-style:none; }
+
+  .wrap{
+    max-width: 1140px;
+    margin: 0 auto;
+    padding: 0 28px;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; }
+  }
+
+  :focus-visible{
+    outline: 3px solid var(--produce-orange);
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+
+  /* ---------- buttons ---------- */
+  .btn{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    padding: 13px 26px;
+    border-radius: 30px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    text-decoration:none;
+    border: none;
+    cursor:pointer;
+    transition: background 0.2s ease, transform 0.15s ease;
+  }
+  .btn:hover{ transform: translateY(-1px); }
+  .btn-primary{ background: var(--farm-green); color:#fff; }
+  .btn-primary:hover{ background: var(--farm-green-light); }
+  .btn-secondary{ background: var(--turmeric); color: var(--earthy-brown); }
+  .btn-secondary:hover{ background: #FBB84C; }
+  .btn-ghost{ background: transparent; color:#fff; border: 1.5px solid rgba(255,255,255,0.55); }
+  .btn-ghost:hover{ background: rgba(255,255,255,0.12); }
+
+  /* ---------- nav ---------- */
+  .topbar{
+    background: var(--farm-green);
+    color: #fff;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+  }
+  .topbar-inner{
+    display:flex;
+    align-items:center;
+    justify-content: space-between;
+    padding: 14px 28px;
+    max-width: 1140px;
+    margin: 0 auto;
+    gap: 20px;
+  }
+  .brand{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-family:"Fraunces", serif;
+    font-weight:600;
+    font-size: 1.15rem;
+    color:#fff;
+    text-decoration:none;
+    flex-shrink:0;
+  }
+  .brand-tag{
+    font-family:"Work Sans", sans-serif;
+    font-size: 0.7rem;
+    font-weight: 500;
+    color: var(--turmeric);
+    display:block;
+    margin-top: 1px;
+  }
+  .nav-links{
+    display:flex;
+    gap: 26px;
+    font-size: 0.92rem;
+    font-weight: 500;
+  }
+  .nav-links a{ text-decoration:none; opacity: 0.92; }
+  .nav-links a:hover{ opacity: 1; text-decoration: underline; text-underline-offset: 4px; }
+
+  .nav-right{ display:flex; align-items:center; gap: 14px; }
+
+  .role-select{
+    position: relative;
+  }
+  .role-btn{
+    background: rgba(255,255,255,0.14);
+    color:#fff;
+    border: 1px solid rgba(255,255,255,0.3);
+    border-radius: 22px;
+    padding: 8px 16px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    display:flex;
+    align-items:center;
+    gap:7px;
+    cursor:pointer;
+  }
+  .role-menu{
+    position: absolute;
+    right: 0;
+    top: calc(100% + 8px);
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(59,42,32,0.18);
+    padding: 8px;
+    width: 210px;
+    display: none;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .role-select.open .role-menu{ display:flex; }
+  .role-menu a{
+    display:flex;
+    align-items:center;
+    gap: 10px;
+    padding: 9px 10px;
+    border-radius: 8px;
+    color: var(--ink);
+    text-decoration:none;
+    font-size: 0.87rem;
+  }
+  .role-menu a:hover{ background: var(--sage); }
+
+  .nav-toggle{ display:none; background:none; border:none; color:#fff; cursor:pointer; }
+
+  @media (max-width: 900px){
+    .nav-links{ display:none; }
+    .nav-toggle{ display:block; }
+  }
+
+  /* ---------- hero ---------- */
+  .hero{
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(180deg, #2E7D32 0%, #3C8D40 55%, #FAFAFA 100%);
+    padding: 78px 0 0;
+    color: #fff;
+  }
+  .hero-inner{
+    display:grid;
+    grid-template-columns: 1.05fr 0.95fr;
+    gap: 40px;
+    align-items:center;
+    animation: fadeIn 1s ease-out both;
+  }
+  @keyframes fadeIn{
+    from{ opacity:0; transform: translateY(14px); }
+    to{ opacity:1; transform: translateY(0); }
+  }
+  .hero-eyebrow-hindi{
+    color: var(--turmeric);
+    font-weight: 600;
+    font-size: 1.05rem;
+    margin-bottom: 14px;
+    font-family: "Fraunces", serif;
+  }
+  .hero h1{
+    color:#fff;
+    font-size: clamp(2.3rem, 4.6vw, 3.5rem);
+    line-height: 1.06;
+  }
+  .hero p.lede{
+    margin-top: 18px;
+    font-size: 1.1rem;
+    color: #EAF3E9;
+    max-width: 50ch;
+  }
+  .hero-ctas{
+    margin-top: 30px;
+    display:flex;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+  .hero-stats{
+    display:flex;
+    gap: 34px;
+    margin-top: 44px;
+    flex-wrap: wrap;
+  }
+  .hero-stat b{
+    display:block;
+    font-family: "Fraunces", serif;
+    font-size: 1.8rem;
+    color: var(--turmeric);
+  }
+  .hero-stat span{ font-size: 0.82rem; color: #DCEBDC; }
+
+  .hero-art{
+    position: relative;
+    padding-bottom: 30px;
+  }
+  .hero-art svg{ width: 100%; height: auto; }
+
+  @media (max-width: 900px){
+    .hero-inner{ grid-template-columns: 1fr; }
+    .hero-art{ order:-1; max-width: 380px; margin: 0 auto; }
+  }
+
+  /* ---------- impact cards ---------- */
+  .impact{
+    padding: 70px 0 20px;
+  }
+  .section-head{
+    max-width: 60ch;
+    margin-bottom: 40px;
+  }
+  .section-eyebrow{
+    color: var(--farm-green);
+    font-weight: 600;
+    font-size: 0.85rem;
+    margin-bottom: 8px;
+  }
+  .section-head h2{ font-size: 1.85rem; }
+  .section-head p{ color:#6b6b6b; margin-top: 10px; }
+
+  .impact-grid{
+    display:grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 22px;
+  }
+  .impact-card{
+    background:#fff;
+    border-radius: 18px;
+    padding: 26px;
+    border: 1px solid #EAE3DA;
+    box-shadow: 0 1px 0 rgba(0,0,0,0.03);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  }
+  .impact-card:hover{
+    transform: translateY(-4px);
+    box-shadow: 0 14px 28px rgba(59,42,32,0.1);
+  }
+  .impact-card.green{ border-top: 4px solid var(--farm-green); }
+  .impact-card.orange{ border-top: 4px solid var(--produce-orange); }
+  .impact-card.turmeric{ border-top: 4px solid var(--turmeric); }
+  .impact-icon{
+    width: 46px; height: 46px;
+    border-radius: 12px;
+    background: var(--sage);
+    display:flex; align-items:center; justify-content:center;
+    margin-bottom: 16px;
+  }
+  .impact-card.orange .impact-icon{ background: #FFF1E0; }
+  .impact-card.turmeric .impact-icon{ background: var(--cream); }
+  .impact-card h3{ font-size: 1.1rem; margin-bottom: 8px; }
+  .impact-card p{ font-size: 0.92rem; color: #6b6b6b; margin:0; }
+
+  @media (max-width: 860px){
+    .impact-grid{ grid-template-columns: 1fr; }
+  }
+
+  /* ---------- journey timeline ---------- */
+  .journey{
+    padding: 80px 0;
+  }
+  .timeline{
+    position: relative;
+    padding-top: 8px;
+  }
+  .timeline-track{
+    position: absolute;
+    top: 27px;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(to right, var(--farm-green), var(--turmeric), var(--produce-orange));
+  }
+  .timeline-row{
+    display:grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    position: relative;
+  }
+  .tstep{
+    text-align:center;
+  }
+  .tstep-node{
+    width: 56px; height: 56px;
+    border-radius: 50%;
+    background: #fff;
+    border: 3px solid var(--farm-green);
+    display:flex; align-items:center; justify-content:center;
+    margin: 0 auto 16px;
+    position: relative;
+    z-index: 2;
+  }
+  .tstep:nth-child(2) .tstep-node{ border-color: var(--turmeric); }
+  .tstep:nth-child(3) .tstep-node{ border-color: var(--produce-orange); }
+  .tstep:nth-child(4) .tstep-node{ border-color: var(--earthy-brown); }
+  .tstep-node svg{ width: 26px; height: 26px; }
+  .tstep h3{ font-size: 1rem; margin-bottom: 6px; }
+  .tstep p{ font-size: 0.85rem; color: #6b6b6b; margin:0; max-width: 24ch; margin: 0 auto; }
+
+  @media (max-width: 760px){
+    .timeline-track{ display:none; }
+    .timeline-row{ grid-template-columns: 1fr; gap: 30px; text-align:left; }
+    .tstep{ display:flex; align-items:flex-start; gap: 16px; text-align:left; }
+    .tstep-node{ margin: 0; flex-shrink:0; }
+    .tstep p{ margin: 0; }
+  }
+
+  /* ---------- fairness band ---------- */
+  .fairness{
+    background: var(--soil);
+    color: #fff;
+    padding: 60px 0;
+  }
+  .fairness-inner{
+    display:flex;
+    align-items:center;
+    gap: 40px;
+    flex-wrap: wrap;
+  }
+  .fairness-number{
+    font-family: "Fraunces", serif;
+    font-size: clamp(3.2rem, 8vw, 5rem);
+    color: var(--turmeric);
+    line-height: 1;
+    flex-shrink:0;
+  }
+  .fairness-text{ max-width: 48ch; color: #E8DFD5; font-size: 1.05rem; }
+  .fairness-text strong{ color:#fff; }
+  .fairness .btn{ margin-top: 6px; }
+
+  /* ---------- roles strip ---------- */
+  .roles{
+    padding: 76px 0;
+    background: var(--sage);
+  }
+  .roles-grid{
+    display:grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 16px;
+  }
+  .role-card{
+    background:#fff;
+    border-radius: 16px;
+    padding: 22px 18px;
+    text-align:center;
+    text-decoration:none;
+    color: var(--ink);
+    border: 1px solid #E3DED3;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .role-card:hover{ transform: translateY(-3px); box-shadow: 0 12px 24px rgba(59,42,32,0.08); }
+  .role-card .ricon{
+    width: 44px; height:44px;
+    border-radius: 50%;
+    background: var(--sage);
+    margin: 0 auto 12px;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .role-card h3{ font-size: 0.95rem; color: var(--earthy-brown); }
+  .role-card p{ font-size: 0.78rem; color: #7a7a7a; margin: 4px 0 0; }
+
+  @media (max-width: 900px){
+    .roles-grid{ grid-template-columns: repeat(2, 1fr); }
+  }
+
+  /* ---------- footer ---------- */
+  footer{
+    background: var(--soil);
+    color: #C9BFB3;
+    padding: 50px 0 26px;
+    font-size: 0.88rem;
+  }
+  .footer-grid{
+    display:grid;
+    grid-template-columns: 1.4fr 1fr 1fr 1fr;
+    gap: 30px;
+    padding-bottom: 34px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+  }
+  footer h4{
+    color: var(--turmeric);
+    font-family: "Work Sans", sans-serif;
+    font-weight: 600;
+    font-size: 0.85rem;
+    margin: 0 0 14px;
+  }
+  footer .brand{ color:#fff; margin-bottom: 10px; }
+  footer p.about{ max-width: 34ch; color: #B6ABA0; }
+  footer li{ margin-bottom: 9px; }
+  footer a{ color: #C9BFB3; text-decoration:none; }
+  footer a:hover{ color: #fff; text-decoration: underline; text-underline-offset: 3px; }
+  .footer-bottom{
+    display:flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding-top: 22px;
+    color: #9A9086;
+    font-size: 0.8rem;
+  }
+
+  @media (max-width: 760px){
+    .footer-grid{ grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <a href="{% url 'home' %}" class="brand">
+      <svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M13 24C13 24 5 19.5 5 12.5C5 8 8.5 5 13 5C17.5 5 21 8 21 12.5C21 19.5 13 24 13 24Z" fill="#F9A825"/>
+        <path d="M13 5C13 5 15 9 13 14C11 9 13 5 13 5Z" fill="#fff"/>
+      </svg>
+      <span>Farm2Door<span class="brand-tag">From Farm to Family, Fairly.</span></span>
+    </a>
+    <nav class="nav-links">
+      <a href="{% url 'marketplace' %}">Marketplace</a>
+      <a href="#how-it-works">How it works</a>
+      <a href="{% url 'login' %}?role=farmer">For farmers</a>
+      <a href="{% url 'marketplace' %}?mode=bulk">Bulk buying</a>
+      <a href="{% url 'traceability' %}">Track a crate</a>
+    </nav>
+    <div class="nav-right">
+      <div class="role-select" id="roleSelect">
+        <button class="role-btn" onclick="document.getElementById('roleSelect').classList.toggle('open')">
+          Log in as
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2.5 4.5L6 8L9.5 4.5" stroke="#fff" stroke-width="1.5"/></svg>
+        </button>
+        <div class="role-menu">
+          <a href="{% url 'login' %}?role=consumer">🧺 Consumer</a>
+          <a href="{% url 'login' %}?role=farmer">🌾 Farmer / FPO</a>
+          <a href="{% url 'login' %}?role=bulk">📦 Bulk buyer</a>
+          <a href="{% url 'login' %}?role=delivery">🚚 Delivery partner</a>
+          <a href="{% url 'login' %}?role=admin">🛠️ Admin</a>
+        </div>
+      </div>
+      <button class="nav-toggle" aria-label="Open menu">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M3 6H19M3 11H19M3 16H19" stroke="#fff" stroke-width="1.6"/></svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<section class="hero">
+  <div class="wrap hero-inner">
+    <div>
+      <div class="hero-eyebrow-hindi">खेत से घर तक, ईमानदारी से</div>
+      <h1>From farm to family, fairly.</h1>
+      <p class="lede">Buy vegetables and fruit straight from the farmers who grow them — no mandi middlemen, no guessing where it came from. Every order is traceable back to the field.</p>
+      <div class="hero-ctas">
+        <a href="{% url 'marketplace' %}" class="btn btn-primary">Shop fresh produce</a>
+        <a href="{% url 'login' %}?role=farmer" class="btn btn-ghost">I'm a farmer</a>
+      </div>
+      <div class="hero-stats">
+        <div class="hero-stat"><b>3,200+</b><span>Farmers onboarded</span></div>
+        <div class="hero-stat"><b>63%</b><span>Avg. farmer price share</span></div>
+        <div class="hero-stat"><b>18</b><span>Districts covered</span></div>
+      </div>
+    </div>
+
+    <div class="hero-art">
+      <svg viewBox="0 0 440 420" xmlns="http://www.w3.org/2000/svg">
+        <ellipse cx="220" cy="390" rx="190" ry="18" fill="#1E5A22"/>
+        <path d="M0 300C60 260 100 280 150 260C210 236 250 270 320 250C370 236 400 260 440 250V420H0V300Z" fill="#256E28"/>
+        <path d="M0 330C70 300 120 320 170 300C230 276 260 300 330 290C380 282 410 300 440 292V420H0V330Z" fill="#2E7D32"/>
+        <g>
+          <rect x="66" y="238" width="6" height="60" fill="#6D4C41"/>
+          <circle cx="69" cy="228" r="26" fill="#4C9A51"/>
+          <circle cx="46" cy="242" r="18" fill="#4C9A51"/>
+          <circle cx="92" cy="242" r="18" fill="#4C9A51"/>
+        </g>
+        <g>
+          <rect x="356" y="228" width="7" height="70" fill="#6D4C41"/>
+          <circle cx="359" cy="216" r="30" fill="#3C8D40"/>
+          <circle cx="332" cy="234" r="20" fill="#3C8D40"/>
+          <circle cx="386" cy="234" r="20" fill="#3C8D40"/>
+        </g>
+        <g transform="translate(150,150)">
+          <circle cx="70" cy="34" r="30" fill="#6D4C41"/>
+          <path d="M40 30C40 12 55 -2 70 -2C85 -2 100 12 100 30" fill="#3B2A20"/>
+          <path d="M8 150C8 100 34 74 70 74C106 74 132 100 132 150V170H8V150Z" fill="#F9A825"/>
+          <rect x="36" y="150" width="68" height="26" rx="6" fill="#FB8C00"/>
+          <circle cx="50" cy="163" r="5" fill="#F9A825"/>
+          <circle cx="70" cy="160" r="5" fill="#2E7D32"/>
+          <circle cx="90" cy="163" r="5" fill="#F9A825"/>
+        </g>
+        <circle cx="360" cy="60" r="26" fill="#FBB84C" opacity="0.9"/>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<div class="wrap">
+  <section class="impact">
+    <div class="section-head">
+      <div class="section-eyebrow">Why Farm2Door</div>
+      <h2>A shorter, fairer road from field to fridge</h2>
+      <p>Three things change when you buy direct from farmers instead of through five layers of mandi.</p>
+    </div>
+    <div class="impact-grid">
+      <div class="impact-card green">
+        <div class="impact-icon">
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M4 18C4 18 4 8 11 8C18 8 18 18 18 18" stroke="#2E7D32" stroke-width="1.7"/><path d="M11 8V3" stroke="#2E7D32" stroke-width="1.7"/><circle cx="11" cy="3" r="1.6" fill="#2E7D32"/></svg>
+        </div>
+        <h3>Farmers earn more</h3>
+        <p>By selling straight to you, farmers on Farm2Door keep an average of 63% of the final price — nearly double the mandi norm.</p>
+      </div>
+      <div class="impact-card orange">
+        <div class="impact-icon">
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="4" y="4" width="14" height="14" rx="2" stroke="#FB8C00" stroke-width="1.7"/><path d="M4 9H18" stroke="#FB8C00" stroke-width="1.7"/><path d="M9 4V18" stroke="#FB8C00" stroke-width="1.7"/></svg>
+        </div>
+        <h3>You know exactly where it's from</h3>
+        <p>Every order comes with a trace code linking back to the farm, the harvest date, and the route it travelled to reach you.</p>
+      </div>
+      <div class="impact-card turmeric">
+        <div class="impact-icon">
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M4 11L9 16L18 6" stroke="#F9A825" stroke-width="2"/></svg>
+        </div>
+        <h3>It's fresher, faster</h3>
+        <p>Most crates reach you within 48–72 hours of harvest — picked, sorted and delivered without sitting in a warehouse.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="journey" id="how-it-works">
+    <div class="section-head">
+      <div class="section-eyebrow">How it works</div>
+      <h2>One crate's journey, start to finish</h2>
+    </div>
+    <div class="timeline">
+      <div class="timeline-track" aria-hidden="true"></div>
+      <div class="timeline-row">
+        <div class="tstep">
+          <div class="tstep-node">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M12 21C12 21 4 16 4 9.5C4 5.9 6.9 3 10.5 3C12 3 13 3.8 12 6C11 3.8 12 3 13.5 3C17.1 3 20 5.9 20 9.5C20 16 12 21 12 21Z" stroke="#2E7D32" stroke-width="1.6"/></svg>
+          </div>
+          <h3>Harvested</h3>
+          <p>Picked at full ripeness and logged against the farmer's ID.</p>
+        </div>
+        <div class="tstep">
+          <div class="tstep-node">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M4 12L9 17L20 6" stroke="#F9A825" stroke-width="2"/></svg>
+          </div>
+          <h3>Sorted &amp; graded</h3>
+          <p>Quality-checked at the village collection centre.</p>
+        </div>
+        <div class="tstep">
+          <div class="tstep-node">
+            <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="9" width="12" height="8" rx="1" stroke="#FB8C00" stroke-width="1.6"/><path d="M15 12H19L21 15V17H15V12Z" stroke="#FB8C00" stroke-width="1.6"/><circle cx="7" cy="18" r="1.6" stroke="#FB8C00" stroke-width="1.4"/><circle cx="18" cy="18" r="1.6" stroke="#FB8C00" stroke-width="1.4"/></svg>
+          </div>
+          <h3>On the road</h3>
+          <p>Cold-chain transport to the nearest delivery hub.</p>
+        </div>
+        <div class="tstep">
+          <div class="tstep-node">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M4 8H15V17H4V8Z" stroke="#6D4C41" stroke-width="1.6"/><path d="M15 11H18L20 13.5V17H15V11Z" stroke="#6D4C41" stroke-width="1.6"/><circle cx="7.5" cy="19" r="1.5" stroke="#6D4C41" stroke-width="1.4"/><circle cx="17" cy="19" r="1.5" stroke="#6D4C41" stroke-width="1.4"/></svg>
+          </div>
+          <h3>At your door</h3>
+          <p>Delivered fresh, usually within 3 days of harvest.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<section class="fairness">
+  <div class="wrap fairness-inner">
+    <div class="fairness-number">63<span style="font-size:0.4em;">%</span></div>
+    <div class="fairness-text">
+      <strong>That's what the average Farm2Door farmer takes home</strong> — against 30–35% through a typical mandi chain. See exactly how any crate's price breaks down.
+      <div><a href="{% url 'traceability' %}?qr=F2D-DEMO-0142" class="btn btn-secondary" style="margin-top:16px;">See a sample trace</a></div>
+    </div>
+  </div>
+</section>
+
+<section class="roles">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="section-eyebrow">Built for everyone in the chain</div>
+      <h2>Find the dashboard made for you</h2>
+    </div>
+    <div class="roles-grid">
+      <a href="{% url 'login' %}?role=consumer" class="role-card">
+        <div class="ricon">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M3 16C3 16 3 8 10 8C17 8 17 16 17 16" stroke="#2E7D32" stroke-width="1.6"/></svg>
+        </div>
+        <h3>Consumer</h3>
+        <p>Shop the marketplace</p>
+      </a>
+      <a href="{% url 'login' %}?role=farmer" class="role-card">
+        <div class="ricon">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 2L14 8H6L10 2Z" fill="#2E7D32"/><rect x="7" y="8" width="6" height="9" fill="#2E7D32"/></svg>
+        </div>
+        <h3>Farmer / FPO</h3>
+        <p>List crops, manage orders</p>
+      </a>
+      <a href="{% url 'login' %}?role=bulk" class="role-card">
+        <div class="ricon">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect x="3" y="6" width="14" height="10" rx="1.5" stroke="#2E7D32" stroke-width="1.6"/><path d="M3 9H17" stroke="#2E7D32" stroke-width="1.6"/></svg>
+        </div>
+        <h3>Bulk buyer</h3>
+        <p>Order at wholesale scale</p>
+      </a>
+      <a href="{% url 'login' %}?role=delivery" class="role-card">
+        <div class="ricon">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M3 7H12V15H3V7Z" stroke="#2E7D32" stroke-width="1.6"/><path d="M12 10H15L17 12.5V15H12V10Z" stroke="#2E7D32" stroke-width="1.6"/></svg>
+        </div>
+        <h3>Delivery partner</h3>
+        <p>Track routes &amp; earnings</p>
+      </a>
+      <a href="{% url 'login' %}?role=admin" class="role-card">
+        <div class="ricon">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M4 15L4 10L9 10L9 15" stroke="#2E7D32" stroke-width="1.6"/><path d="M11 15V6L16 6V15" stroke="#2E7D32" stroke-width="1.6"/></svg>
+        </div>
+        <h3>Admin</h3>
+        <p>Analytics &amp; verification</p>
+      </a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="footer-grid">
+      <div>
+        <div class="brand">
+          <svg width="24" height="24" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M13 24C13 24 5 19.5 5 12.5C5 8 8.5 5 13 5C17.5 5 21 8 21 12.5C21 19.5 13 24 13 24Z" fill="#F9A825"/>
+            <path d="M13 5C13 5 15 9 13 14C11 9 13 5 13 5Z" fill="#fff"/>
+          </svg>
+          Farm2Door
+        </div>
+        <p class="about">A direct line between Indian farmers and the families who eat what they grow.</p>
+      </div>
+      <div>
+        <h4>Marketplace</h4>
+        <ul>
+          <li><a href="{% url 'marketplace' %}">Shop produce</a></li>
+          <li><a href="{% url 'marketplace' %}?mode=bulk">Group buying</a></li>
+          <li><a href="{% url 'traceability' %}">Track a crate</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>For farmers</h4>
+        <ul>
+          <li><a href="{% url 'login' %}?role=farmer">List your crop</a></li>
+          <li><a href="{% url 'farmer_dashboard' %}#earnings">Pricing &amp; payouts</a></li>
+          <li><a href="{% url 'login' %}?role=farmer">Join an FPO</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <ul>
+          <li><a href="#">About us</a></li>
+          <li><a href="#">Careers</a></li>
+          <li><a href="#">Contact</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div>© 2026 Farm2Door. All rights reserved.</div>
+      <div>खेत से घर तक, ईमानदारी से</div>
+    </div>
+  </div>
+</footer>
+
+<script>
+  document.addEventListener('click', function(e){
+    var sel = document.getElementById('roleSelect');
+    if(!sel.contains(e.target)) sel.classList.remove('open');
+  });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Farm2Door — Buyer Marketplace</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,500;0,600;0,700;1,500&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --farm-green:#2E7D32;
+    --farm-green-light:#4CAF50;
+    --turmeric:#F9A825;
+    --orange:#FB8C00;
+    --brown:#6D4C41;
+    --bg:#FAFAFA;
+    --text:#333333;
+    --text-soft:#6b6b6b;
+    --white:#FFFFFF;
+    --shadow-sm: 0 2px 8px rgba(46,30,10,0.06);
+    --shadow-md: 0 8px 24px rgba(46,30,10,0.10);
+    --radius-lg: 18px;
+    --radius-md: 12px;
+    --radius-pill: 999px;
+  }
+
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    font-family:'Work Sans', sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,h4{
+    font-family:'Fraunces', serif;
+    color:var(--brown);
+    font-weight:700;
+    line-height:1.2;
+  }
+  button{font-family:inherit; cursor:pointer; border:none;}
+  input, select{font-family:inherit;}
+  img,svg{display:block;}
+  a{color:inherit; text-decoration:none;}
+  :focus-visible{outline:3px solid var(--farm-green-light); outline-offset:2px; border-radius:4px;}
+
+  /* ---------- NAVBAR ---------- */
+  .navbar{
+    position:sticky; top:0; z-index:200;
+    background:var(--farm-green);
+    color:var(--white);
+    display:flex; align-items:center; gap:20px;
+    padding:14px 28px;
+    box-shadow:var(--shadow-md);
+  }
+  .brand{display:flex; align-items:center; gap:10px; flex-shrink:0;}
+  .brand svg{width:30px; height:30px;}
+  .brand-name{font-family:'Fraunces', serif; font-weight:700; font-size:1.25rem;}
+  .brand-tagline-nav{display:none; font-size:0.7rem; opacity:0.85; margin-top:-2px;}
+  @media (min-width:900px){ .brand-tagline-nav{display:block;} }
+
+  .nav-search{
+    flex:1; max-width:520px; display:flex; align-items:center;
+    background:var(--white); border-radius:var(--radius-pill);
+    padding:9px 16px; gap:8px;
+  }
+  .nav-search input{
+    border:none; outline:none; flex:1; font-size:0.92rem; color:var(--text); background:transparent;
+  }
+  .nav-search svg{width:18px; height:18px; color:var(--text-soft); flex-shrink:0;}
+
+  .nav-actions{display:flex; align-items:center; gap:10px; margin-left:auto;}
+  .icon-btn{
+    position:relative; background:rgba(255,255,255,0.14); color:var(--white);
+    width:40px; height:40px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    transition:background 0.2s ease;
+  }
+  .icon-btn:hover{background:rgba(255,255,255,0.26);}
+  .icon-btn svg{width:19px; height:19px;}
+  .badge-count{
+    position:absolute; top:-4px; right:-4px;
+    background:var(--turmeric); color:var(--brown);
+    font-size:0.65rem; font-weight:700;
+    min-width:17px; height:17px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    padding:0 3px; border:2px solid var(--farm-green);
+  }
+  .role-pill{
+    background:rgba(255,255,255,0.14); padding:8px 14px; border-radius:var(--radius-pill);
+    font-size:0.85rem; font-weight:600; display:flex; align-items:center; gap:6px;
+  }
+  .role-pill svg{width:14px; height:14px;}
+
+  /* ---------- PAGE HEADER ---------- */
+  .page-head{
+    max-width:1320px; margin:0 auto; padding:34px 28px 18px;
+    animation:fadeSlideIn 0.6s ease both;
+  }
+  @keyframes fadeSlideIn{
+    from{opacity:0; transform:translateY(12px);}
+    to{opacity:1; transform:translateY(0);}
+  }
+  .page-head h1{font-size:2.1rem; margin-bottom:8px;}
+  .hindi-tagline{
+    display:inline-block;
+    font-size:0.95rem; color:var(--brown); font-weight:600;
+    background:linear-gradient(transparent 62%, rgba(249,168,37,0.45) 62%);
+    padding:0 2px;
+  }
+  .page-head p.sub{color:var(--text-soft); margin-top:10px; max-width:640px; font-size:0.98rem;}
+
+  /* ---------- CONTROLS BAR ---------- */
+  .controls-bar{
+    max-width:1320px; margin:0 auto; padding:0 28px 20px;
+    display:flex; flex-wrap:wrap; gap:14px; align-items:center;
+  }
+  .chip-row{display:flex; gap:8px; flex-wrap:wrap; flex:1;}
+  .chip{
+    padding:8px 16px; border-radius:var(--radius-pill);
+    background:var(--white); border:1px solid #e4e0d8; color:var(--text);
+    font-size:0.87rem; font-weight:600; transition:all 0.18s ease;
+  }
+  .chip:hover{border-color:var(--farm-green);}
+  .chip.active{background:var(--farm-green); color:var(--white); border-color:var(--farm-green);}
+
+  .controls-right{display:flex; gap:10px; align-items:center; flex-wrap:wrap;}
+  .select-sort{
+    padding:9px 14px; border-radius:var(--radius-md); border:1px solid #e4e0d8;
+    background:var(--white); font-size:0.87rem; color:var(--text); font-weight:500;
+  }
+  .toggle-wrap{display:flex; align-items:center; gap:8px; font-size:0.87rem; font-weight:600; color:var(--brown);}
+  .switch{position:relative; width:40px; height:22px; flex-shrink:0;}
+  .switch input{opacity:0; width:0; height:0;}
+  .slider-track{
+    position:absolute; inset:0; background:#dcd6c9; border-radius:var(--radius-pill); transition:0.2s;
+  }
+  .slider-track::before{
+    content:''; position:absolute; width:16px; height:16px; left:3px; top:3px;
+    background:var(--white); border-radius:50%; transition:0.2s;
+  }
+  .switch input:checked + .slider-track{background:var(--farm-green);}
+  .switch input:checked + .slider-track::before{transform:translateX(18px);}
+
+  /* ---------- GROUP BUY STRIP ---------- */
+  .groupbuy-section{
+    background:linear-gradient(120deg, var(--orange), #ffa733);
+    padding:22px 0; margin-bottom:32px;
+  }
+  .groupbuy-inner{max-width:1320px; margin:0 auto; padding:0 28px;}
+  .groupbuy-inner h2{
+    color:var(--white); font-size:1.15rem; margin-bottom:4px; -webkit-text-fill-color:var(--white);
+  }
+  .groupbuy-inner > p{color:rgba(255,255,255,0.9); font-size:0.85rem; margin-bottom:14px;}
+  .groupbuy-scroll{display:flex; gap:16px; overflow-x:auto; padding-bottom:6px;}
+  .gb-card{
+    flex:0 0 280px; background:var(--white); border-radius:var(--radius-lg);
+    padding:16px; box-shadow:var(--shadow-md);
+  }
+  .gb-top{display:flex; gap:10px; align-items:flex-start;}
+  .gb-icon{
+    width:44px; height:44px; border-radius:50%; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center; font-size:1.4rem;
+    background:linear-gradient(135deg,#FFD54F,#F9A825);
+  }
+  .gb-top h3{font-size:0.98rem; color:var(--brown);}
+  .gb-top span{font-size:0.76rem; color:var(--text-soft);}
+  .gb-price-row{display:flex; align-items:baseline; gap:8px; margin:10px 0 6px;}
+  .gb-price-row .deal{font-size:1.15rem; font-weight:700; color:var(--farm-green);}
+  .gb-price-row .orig{font-size:0.85rem; color:#a39a8c; text-decoration:line-through;}
+  .gb-progress-track{background:#f1ede4; border-radius:var(--radius-pill); height:7px; overflow:hidden; margin-bottom:6px;}
+  .gb-progress-fill{background:var(--farm-green); height:100%; border-radius:var(--radius-pill); transition:width 0.4s ease;}
+  .gb-meta{display:flex; justify-content:space-between; font-size:0.76rem; color:var(--text-soft); margin-bottom:12px;}
+  .gb-join-btn{
+    width:100%; padding:9px; border-radius:var(--radius-md);
+    background:var(--brown); color:var(--white); font-weight:600; font-size:0.85rem;
+    transition:background 0.2s ease;
+  }
+  .gb-join-btn:hover{background:#5a3d34;}
+  .gb-join-btn.joined{background:var(--farm-green); cursor:default;}
+
+  /* ---------- MAIN LAYOUT ---------- */
+  .layout{
+    max-width:1320px; margin:0 auto; padding:0 28px 60px;
+    display:grid; grid-template-columns:220px 1fr 300px; gap:24px; align-items:start;
+  }
+  @media (max-width:1180px){ .layout{grid-template-columns:200px 1fr;} .cart-panel{display:none;} }
+  @media (max-width:800px){ .layout{grid-template-columns:1fr;} .filter-rail{display:none;} }
+
+  /* ---- filter rail ---- */
+  .filter-rail{
+    position:sticky; top:88px;
+    background:var(--white); border-radius:var(--radius-lg);
+    padding:18px; box-shadow:var(--shadow-sm);
+  }
+  .filter-rail h4{font-size:0.95rem; margin-bottom:12px;}
+  .filter-group{margin-bottom:20px;}
+  .filter-group label{
+    display:block; font-size:0.83rem; color:var(--text-soft); font-weight:500; margin-bottom:8px;
+  }
+  .filter-group input[type="range"]{width:100%; accent-color:var(--farm-green);}
+  .range-val{font-size:0.78rem; color:var(--brown); font-weight:600;}
+  .radio-row{display:flex; align-items:center; gap:8px; font-size:0.85rem; margin-bottom:7px; color:var(--text);}
+  .radio-row input{accent-color:var(--farm-green);}
+  .clear-btn{
+    width:100%; padding:8px; border-radius:var(--radius-md); background:var(--bg);
+    border:1px solid #e4e0d8; font-size:0.82rem; font-weight:600; color:var(--brown);
+  }
+  .clear-btn:hover{background:#f1ede4;}
+
+  /* ---- product grid ---- */
+  .grid-head{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:14px;}
+  .grid-head span{font-size:0.85rem; color:var(--text-soft);}
+  .product-grid{
+    display:grid; grid-template-columns:repeat(auto-fill, minmax(230px,1fr)); gap:18px;
+  }
+  .product-card{
+    background:var(--white); border-radius:var(--radius-lg); overflow:hidden;
+    box-shadow:var(--shadow-sm); border:1px solid transparent;
+    display:flex; flex-direction:column; transition:box-shadow 0.2s ease, border-color 0.2s ease;
+  }
+  .product-card:hover{box-shadow:var(--shadow-md); border-color:rgba(251,140,0,0.35);}
+  .product-media{
+    position:relative; height:130px; display:flex; align-items:center; justify-content:center;
+    font-size:3rem; overflow:hidden; cursor:pointer;
+  }
+  .product-media span.emoji-wrap{transition:transform 0.35s ease;}
+  .product-card:hover .product-media span.emoji-wrap{transform:scale(1.18);}
+  .cat-veg{background:linear-gradient(135deg,#81C784,#2E7D32);}
+  .cat-fruit{background:linear-gradient(135deg,#FFCC80,#FB8C00);}
+  .cat-grain{background:linear-gradient(135deg,#BCAAA4,#6D4C41);}
+  .cat-spice{background:linear-gradient(135deg,#FFE082,#F9A825);}
+  .cat-dairy{background:linear-gradient(135deg,#FFF8E1,#FFE0B2);}
+  .product-badge{
+    position:absolute; top:8px; left:8px; background:var(--white); color:var(--brown);
+    font-size:0.66rem; font-weight:700; padding:3px 9px; border-radius:var(--radius-pill);
+    box-shadow:var(--shadow-sm);
+  }
+  .organic-badge{
+    position:absolute; top:8px; right:8px; background:var(--farm-green); color:var(--white);
+    font-size:0.62rem; font-weight:700; padding:3px 8px; border-radius:var(--radius-pill);
+  }
+  .product-body{padding:14px; display:flex; flex-direction:column; gap:5px; flex:1;}
+  .product-name{font-family:'Fraunces',serif; font-weight:600; font-size:1rem; color:var(--brown); cursor:pointer;}
+  .product-hindi{font-size:0.74rem; color:var(--text-soft);}
+  .product-farmer{font-size:0.76rem; color:var(--text-soft);}
+  .product-rating{display:flex; align-items:center; gap:4px; font-size:0.78rem; color:var(--brown); font-weight:600;}
+  .product-rating svg{width:13px; height:13px; fill:var(--turmeric);}
+  .product-price-row{display:flex; align-items:baseline; justify-content:space-between; margin-top:4px;}
+  .product-price{font-size:1.08rem; font-weight:700; color:var(--farm-green);}
+  .product-unit{font-size:0.74rem; color:var(--text-soft);}
+  .product-footer{padding:0 14px 14px; display:flex; align-items:center; gap:8px;}
+  .qty-stepper{
+    display:flex; align-items:center; border:1px solid #e4e0d8; border-radius:var(--radius-md); overflow:hidden;
+  }
+  .qty-stepper button{width:26px; height:30px; background:var(--bg); font-weight:700; color:var(--brown);}
+  .qty-stepper span{width:26px; text-align:center; font-size:0.85rem; font-weight:600;}
+  .add-btn{
+    flex:1; background:var(--farm-green); color:var(--white); padding:8px; border-radius:var(--radius-md);
+    font-size:0.82rem; font-weight:700; transition:background 0.2s ease;
+  }
+  .add-btn:hover{background:var(--farm-green-light);}
+  .add-btn.added{background:var(--brown);}
+
+  .empty-state{
+    grid-column:1/-1; text-align:center; padding:50px 20px; color:var(--text-soft);
+  }
+  .empty-state h3{color:var(--brown); margin-bottom:6px;}
+
+  /* ---- cart panel ---- */
+  .cart-panel{
+    position:sticky; top:88px; background:var(--white); border-radius:var(--radius-lg);
+    box-shadow:var(--shadow-sm); display:flex; flex-direction:column; max-height:calc(100vh - 110px);
+  }
+  .cart-header{padding:16px 18px; border-bottom:1px solid #f0ece2; display:flex; justify-content:space-between; align-items:center;}
+  .cart-header h3{font-size:1rem;}
+  .cart-items{padding:8px 18px; overflow-y:auto; flex:1;}
+  .cart-item{display:flex; gap:10px; padding:11px 0; border-bottom:1px solid #f4f1ea;}
+  .cart-item:last-child{border-bottom:none;}
+  .cart-item-icon{
+    width:38px; height:38px; border-radius:10px; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center; font-size:1.3rem;
+  }
+  .cart-item-info{flex:1; min-width:0;}
+  .cart-item-info .name{font-size:0.85rem; font-weight:600; color:var(--brown);}
+  .cart-item-info .meta{font-size:0.72rem; color:var(--text-soft);}
+  .cart-item-controls{display:flex; align-items:center; gap:6px; margin-top:4px;}
+  .cart-item-controls button{
+    width:20px; height:20px; border-radius:5px; background:var(--bg); font-size:0.75rem; font-weight:700; color:var(--brown);
+  }
+  .cart-item-controls span{font-size:0.78rem; font-weight:600; min-width:16px; text-align:center;}
+  .cart-item-remove{color:#b04a3d; font-size:0.7rem; margin-left:auto; font-weight:600;}
+  .cart-empty{padding:30px 10px; text-align:center; color:var(--text-soft); font-size:0.86rem;}
+  .cart-summary{padding:14px 18px 18px; border-top:1px solid #f0ece2;}
+  .summary-row{display:flex; justify-content:space-between; font-size:0.84rem; color:var(--text-soft); margin-bottom:6px;}
+  .summary-row.total{font-size:1rem; font-weight:700; color:var(--brown); margin-top:6px;}
+  .checkout-btn{
+    width:100%; margin-top:10px; padding:12px; border-radius:var(--radius-md);
+    background:var(--farm-green); color:var(--white); font-weight:700; font-size:0.92rem;
+    transition:background 0.2s ease;
+  }
+  .checkout-btn:hover{background:var(--farm-green-light);}
+  .checkout-btn:disabled{background:#cfcabf; cursor:not-allowed;}
+  .free-delivery-note{font-size:0.72rem; color:var(--farm-green); margin-top:6px; text-align:center; font-weight:600;}
+
+  /* ---- mobile cart fab + drawer ---- */
+  .cart-fab{
+    display:none; position:fixed; bottom:20px; right:20px; z-index:150;
+    background:var(--farm-green); color:var(--white); border-radius:var(--radius-pill);
+    padding:13px 20px; box-shadow:var(--shadow-md); font-weight:700; font-size:0.88rem;
+    align-items:center; gap:8px;
+  }
+  @media (max-width:1180px){ .cart-fab{display:flex;} }
+  .drawer-overlay{
+    display:none; position:fixed; inset:0; background:rgba(30,20,10,0.4); z-index:300;
+  }
+  .drawer-overlay.open{display:block;}
+  .cart-drawer{
+    position:fixed; top:0; right:0; height:100%; width:min(380px,90vw); background:var(--white);
+    z-index:301; transform:translateX(100%); transition:transform 0.3s ease;
+    display:flex; flex-direction:column;
+  }
+  .cart-drawer.open{transform:translateX(0);}
+  .drawer-close{background:none; font-size:1.4rem; color:var(--brown);}
+
+  /* ---- toast ---- */
+  .toast{
+    position:fixed; top:20px; right:20px; z-index:400;
+    background:var(--brown); color:var(--white); padding:12px 18px; border-radius:var(--radius-md);
+    font-size:0.85rem; font-weight:600; box-shadow:var(--shadow-md);
+    transform:translateX(120%); transition:transform 0.35s ease; display:flex; align-items:center; gap:8px;
+  }
+  .toast.show{transform:translateX(0);}
+  .toast svg{width:16px; height:16px; flex-shrink:0;}
+
+  /* ---- quick view modal ---- */
+  .modal-overlay{
+    display:none; position:fixed; inset:0; background:rgba(30,20,10,0.45); z-index:500;
+    align-items:center; justify-content:center; padding:20px;
+  }
+  .modal-overlay.open{display:flex;}
+  .modal-box{
+    background:var(--white); border-radius:var(--radius-lg); max-width:480px; width:100%;
+    overflow:hidden; box-shadow:var(--shadow-md); animation:fadeSlideIn 0.25s ease both;
+  }
+  .modal-media{height:160px; display:flex; align-items:center; justify-content:center; font-size:4rem; position:relative;}
+  .modal-close{
+    position:absolute; top:10px; right:10px; background:rgba(255,255,255,0.85); width:30px; height:30px;
+    border-radius:50%; font-size:1rem; color:var(--brown); font-weight:700;
+  }
+  .modal-content{padding:20px;}
+  .modal-content h3{font-size:1.3rem; margin-bottom:4px;}
+  .modal-farmer{font-size:0.85rem; color:var(--text-soft); margin-bottom:10px;}
+  .modal-trace{
+    background:var(--bg); border-radius:var(--radius-md); padding:10px 12px; font-size:0.8rem;
+    color:var(--brown); margin-bottom:14px; display:flex; gap:8px; align-items:flex-start;
+  }
+  .modal-trace svg{width:16px; height:16px; flex-shrink:0; margin-top:2px;}
+  .modal-price-row{display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;}
+  .modal-price-row .price{font-size:1.4rem; font-weight:700; color:var(--farm-green);}
+
+  /* ---- footer ---- */
+  footer{background:var(--brown); color:#f0e9de; padding:26px 28px; margin-top:20px;}
+  .footer-inner{max-width:1320px; margin:0 auto; display:flex; justify-content:space-between; flex-wrap:wrap; gap:12px; align-items:center;}
+  .footer-inner a{font-size:0.82rem; opacity:0.85;}
+  .footer-inner a:hover{opacity:1; text-decoration:underline;}
+  .footer-links{display:flex; gap:18px; flex-wrap:wrap;}
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation:none !important; transition:none !important;}
+  }
+</style>
+</head>
+<body>
+
+<!-- ===================== NAVBAR ===================== -->
+<header class="navbar">
+  <a class="brand" href="{% url 'home' %}" style="text-decoration:none;color:inherit;">
+    <svg viewBox="0 0 24 24" fill="none"><path d="M12 2C7 2 3 6 3 11c0 5.5 9 11 9 11s9-5.5 9-11c0-5-4-9-9-9z" fill="#F9A825"/><path d="M12 6c-2.8 0-5 2.2-5 5 0 3.3 5 7 5 7s5-3.7 5-7c0-2.8-2.2-5-5-5z" fill="#2E7D32"/></svg>
+    <div>
+      <div class="brand-name">Farm2Door</div>
+      <div class="brand-tagline-nav">From Farm to Family, Fairly.</div>
+    </div>
+  </a>
+
+  <div class="nav-search">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input id="searchInput" type="text" placeholder="Search vegetables, fruits, grains, spices…" aria-label="Search products">
+  </div>
+
+  <div class="nav-actions">
+    <button class="icon-btn" aria-label="Notifications" onclick="window.location.href='{% url 'notifications' %}'">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      <span class="badge-count">3</span>
+    </button>
+    <button class="icon-btn" id="cartIconBtn" aria-label="Open cart">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+      <span class="badge-count" id="cartBadge">0</span>
+    </button>
+    <div class="role-pill">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Buyer
+    </div>
+  </div>
+</header>
+
+<!-- ===================== PAGE HEADER ===================== -->
+<div class="page-head">
+  <h1>Buyer Marketplace</h1>
+  <span class="hindi-tagline">खेत से घर तक, ईमानदारी से</span>
+  <p class="sub">Fresh produce bought straight from farmers and FPOs near you — no middlemen, transparent pricing, and full traceability on every order.</p>
+</div>
+
+<!-- ===================== CONTROLS ===================== -->
+<div class="controls-bar">
+  <div class="chip-row" id="categoryChips"></div>
+  <div class="controls-right">
+    <label class="toggle-wrap">
+      <span class="switch">
+        <input type="checkbox" id="organicToggle">
+        <span class="slider-track"></span>
+      </span>
+      Organic only
+    </label>
+    <select class="select-sort" id="sortSelect">
+      <option value="relevance">Sort: Relevance</option>
+      <option value="price-low">Price: Low to High</option>
+      <option value="price-high">Price: High to Low</option>
+      <option value="rating">Highest Rated</option>
+    </select>
+  </div>
+</div>
+
+<!-- ===================== GROUP BUYING ===================== -->
+<section class="groupbuy-section">
+  <div class="groupbuy-inner">
+    <h2>Group buying — save more together</h2>
+    <p>Join a bulk order with nearby buyers to unlock farmer-direct prices</p>
+    <div class="groupbuy-scroll" id="groupBuyList"></div>
+  </div>
+</section>
+
+<!-- ===================== MAIN LAYOUT ===================== -->
+<div class="layout">
+  <!-- FILTER RAIL -->
+  <aside class="filter-rail">
+    <h4>Refine results</h4>
+    <div class="filter-group">
+      <label for="priceRange">Max price: <span class="range-val" id="priceVal">₹400</span></label>
+      <input type="range" id="priceRange" min="10" max="400" value="400">
+    </div>
+    <div class="filter-group">
+      <label>Minimum rating</label>
+      <div class="radio-row"><input type="radio" name="rating" value="0" id="r0" checked><label for="r0">Any</label></div>
+      <div class="radio-row"><input type="radio" name="rating" value="4"><label>4★ &amp; up</label></div>
+      <div class="radio-row"><input type="radio" name="rating" value="4.5"><label>4.5★ &amp; up</label></div>
+    </div>
+    <div class="filter-group">
+      <label>Distance from you</label>
+      <div class="radio-row"><input type="radio" name="dist" value="999" id="d0" checked><label for="d0">Any distance</label></div>
+      <div class="radio-row"><input type="radio" name="dist" value="20"><label>Within 20 km</label></div>
+      <div class="radio-row"><input type="radio" name="dist" value="50"><label>Within 50 km</label></div>
+    </div>
+    <button class="clear-btn" id="clearFilters">Clear all filters</button>
+  </aside>
+
+  <!-- PRODUCT GRID -->
+  <main>
+    <div class="grid-head">
+      <h3 style="font-size:1.05rem;">Fresh from the farm</h3>
+      <span id="resultCount"></span>
+    </div>
+    <div class="product-grid" id="productGrid"></div>
+  </main>
+
+  <!-- CART PANEL (desktop) -->
+  <aside class="cart-panel" id="cartPanelDesktop">
+    <div class="cart-header"><h3>Your cart</h3><span id="cartCountLabel">0 items</span></div>
+    <div class="cart-items" id="cartItemsDesktop"></div>
+    <div class="cart-summary" id="cartSummaryDesktop"></div>
+  </aside>
+</div>
+
+<!-- MOBILE CART FAB + DRAWER -->
+<button class="cart-fab" id="cartFab">
+  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+  <span id="fabLabel">Cart · 0</span>
+</button>
+<div class="drawer-overlay" id="drawerOverlay"></div>
+<div class="cart-drawer" id="cartDrawer">
+  <div class="cart-header"><h3>Your cart</h3><button class="drawer-close" id="drawerClose" aria-label="Close cart">&times;</button></div>
+  <div class="cart-items" id="cartItemsMobile"></div>
+  <div class="cart-summary" id="cartSummaryMobile"></div>
+</div>
+
+<!-- QUICK VIEW MODAL -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal-box" id="modalBox"></div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<footer>
+  <div class="footer-inner">
+    <span>© 2026 Farm2Door · From Farm to Family, Fairly.</span>
+    <div class="footer-links">
+      <a href="{% url 'traceability' %}">Track order</a>
+      <a href="{% url 'traceability' %}">Traceability</a>
+      <a href="#">Help centre</a>
+      <a href="{% url 'login' %}?role=farmer">Become a seller</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+/* ========================= DATA ========================= */
+const PRODUCTS = [
+  {id:1,  name:"Tomato",        hindi:"टमाटर",       farmer:"Ramesh Patil",   village:"Nashik, Maharashtra",      price:28,  unit:"kg",    category:"Vegetables", cat:"veg",   icon:"🍅", rating:4.6, organic:true,  distance:12, badge:"Fresh Today"},
+  {id:2,  name:"Onion",         hindi:"प्याज",        farmer:"Suresh Yadav",   village:"Lasalgaon, Maharashtra",   price:22,  unit:"kg",    category:"Vegetables", cat:"veg",   icon:"🧅", rating:4.3, organic:false, distance:18, badge:null},
+  {id:3,  name:"Potato",        hindi:"आलू",          farmer:"Devendra Singh", village:"Agra, Uttar Pradesh",      price:18,  unit:"kg",    category:"Vegetables", cat:"veg",   icon:"🥔", rating:4.5, organic:false, distance:25, badge:"Bestseller"},
+  {id:4,  name:"Spinach",       hindi:"पालक",         farmer:"Kavita Devi",    village:"Sonipat, Haryana",         price:15,  unit:"bunch", category:"Vegetables", cat:"veg",   icon:"🥬", rating:4.7, organic:true,  distance:9,  badge:"Fresh Today"},
+  {id:5,  name:"Carrot",        hindi:"गाजर",         farmer:"Baljeet Kaur",   village:"Hoshiarpur, Punjab",       price:25,  unit:"kg",    category:"Vegetables", cat:"veg",   icon:"🥕", rating:4.5, organic:true,  distance:30, badge:null},
+  {id:6,  name:"Cauliflower",   hindi:"फूलगोभी",      farmer:"Om Prakash",     village:"Kanpur, Uttar Pradesh",    price:20,  unit:"piece", category:"Vegetables", cat:"veg",   icon:"🥦", rating:4.3, organic:false, distance:22, badge:null},
+  {id:7,  name:"Alphonso Mango",hindi:"आम",           farmer:"Anil Kadam",     village:"Ratnagiri, Maharashtra",   price:350, unit:"dozen", category:"Fruits",     cat:"fruit", icon:"🥭", rating:4.9, organic:false, distance:40, badge:"Seasonal"},
+  {id:8,  name:"Banana",        hindi:"केला",         farmer:"Lakshmi Naidu",  village:"Anantapur, Andhra Pradesh",price:45,  unit:"dozen", category:"Fruits",     cat:"fruit", icon:"🍌", rating:4.4, organic:false, distance:22, badge:null},
+  {id:9,  name:"Apple",         hindi:"सेब",          farmer:"Tashi Namgyal",  village:"Shimla, Himachal Pradesh", price:180, unit:"kg",    category:"Fruits",     cat:"fruit", icon:"🍎", rating:4.7, organic:true,  distance:65, badge:"Premium"},
+  {id:10, name:"Basmati Rice",  hindi:"बासमती चावल", farmer:"Harpreet Singh", village:"Amritsar, Punjab",         price:95,  unit:"kg",    category:"Grains & Pulses", cat:"grain", icon:"🌾", rating:4.8, organic:false, distance:60, badge:"Bestseller"},
+  {id:11, name:"Wheat",         hindi:"गेहूं",         farmer:"Ramkumar Verma", village:"Sehore, Madhya Pradesh",   price:32,  unit:"kg",    category:"Grains & Pulses", cat:"grain", icon:"🌾", rating:4.5, organic:false, distance:45, badge:null},
+  {id:12, name:"Toor Dal",      hindi:"तूर दाल",      farmer:"Meena Kumari",   village:"Latur, Maharashtra",       price:110, unit:"kg",    category:"Grains & Pulses", cat:"grain", icon:"🫘", rating:4.6, organic:true,  distance:55, badge:null},
+  {id:13, name:"Turmeric",      hindi:"हल्दी",        farmer:"Basavaraj Patil",village:"Sangli, Maharashtra",      price:180, unit:"kg",    category:"Spices",     cat:"spice", icon:"🫚", rating:4.7, organic:true,  distance:50, badge:"Farmer's Pick"},
+  {id:14, name:"Green Chilli",  hindi:"हरी मिर्च",    farmer:"Farida Bee",     village:"Guntur, Andhra Pradesh",   price:40,  unit:"kg",    category:"Spices",     cat:"spice", icon:"🌶️", rating:4.2, organic:false, distance:15, badge:null},
+  {id:15, name:"Cow Milk",      hindi:"गाय का दूध",   farmer:"Rajeshwar Patel",village:"Anand, Gujarat",           price:58,  unit:"litre", category:"Dairy",      cat:"dairy", icon:"🥛", rating:4.9, organic:true,  distance:5,  badge:"Fresh Today"},
+  {id:16, name:"Paneer",        hindi:"पनीर",         farmer:"Sunita Sharma",  village:"Karnal, Haryana",          price:320, unit:"kg",    category:"Dairy",      cat:"dairy", icon:"🧀", rating:4.8, organic:false, distance:20, badge:"Bestseller"},
+];
+
+const GROUP_BUYS = [
+  {id:"g1", title:"Onion Bulk Sack (50kg)", desc:"Direct from Lasalgaon FPO farmers", icon:"🧅", orig:22, deal:17, unit:"kg", joined:8, target:15, daysLeft:2},
+  {id:"g2", title:"Basmati Rice Combo (25kg)", desc:"Amritsar premium harvest, sealed sacks", icon:"🌾", orig:95, deal:82, unit:"kg", joined:12, target:20, daysLeft:1},
+  {id:"g3", title:"Organic Turmeric (10kg)", desc:"Sangli farm-fresh, lab tested purity", icon:"🫚", orig:180, deal:155, unit:"kg", joined:5, target:10, daysLeft:3},
+];
+
+const CATEGORIES = ["All","Vegetables","Fruits","Grains & Pulses","Spices","Dairy"];
+
+/* ========================= STATE ========================= */
+let state = {
+  category:"All",
+  search:"",
+  organicOnly:false,
+  sort:"relevance",
+  maxPrice:400,
+  minRating:0,
+  maxDistance:999,
+};
+let cart = {};      // {productId: qty}
+let joinedGB = {};  // {groupBuyId: true}
+
+/* ========================= HELPERS ========================= */
+function fmt(n){ return "₹" + n.toLocaleString("en-IN"); }
+
+function showToast(msg, iconSvg){
+  const t = document.getElementById("toast");
+  t.innerHTML = (iconSvg || '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>') + "<span>"+msg+"</span>";
+  t.classList.add("show");
+  clearTimeout(t._timer);
+  t._timer = setTimeout(()=> t.classList.remove("show"), 2200);
+}
+
+/* ========================= RENDER: CATEGORY CHIPS ========================= */
+function renderChips(){
+  const wrap = document.getElementById("categoryChips");
+  wrap.innerHTML = CATEGORIES.map(c =>
+    `<button class="chip ${c===state.category?'active':''}" data-cat="${c}">${c}</button>`
+  ).join("");
+  wrap.querySelectorAll(".chip").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      state.category = btn.dataset.cat;
+      renderChips();
+      renderGrid();
+    });
+  });
+}
+
+/* ========================= RENDER: GROUP BUY ========================= */
+function renderGroupBuys(){
+  const wrap = document.getElementById("groupBuyList");
+  wrap.innerHTML = GROUP_BUYS.map(g=>{
+    const pct = Math.min(100, Math.round((g.joined/g.target)*100));
+    const isJoined = !!joinedGB[g.id];
+    return `
+    <div class="gb-card">
+      <div class="gb-top">
+        <div class="gb-icon">${g.icon}</div>
+        <div>
+          <h3>${g.title}</h3>
+          <span>${g.desc}</span>
+        </div>
+      </div>
+      <div class="gb-price-row">
+        <span class="deal">${fmt(g.deal)}/${g.unit}</span>
+        <span class="orig">${fmt(g.orig)}/${g.unit}</span>
+      </div>
+      <div class="gb-progress-track"><div class="gb-progress-fill" style="width:${pct}%"></div></div>
+      <div class="gb-meta"><span>${g.joined}/${g.target} joined</span><span>${g.daysLeft} day${g.daysLeft>1?'s':''} left</span></div>
+      <button class="gb-join-btn ${isJoined?'joined':''}" data-gb="${g.id}" ${isJoined?'disabled':''}>${isJoined?'You joined ✓':'Join this deal'}</button>
+    </div>`;
+  }).join("");
+
+  wrap.querySelectorAll(".gb-join-btn").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      const id = btn.dataset.gb;
+      const g = GROUP_BUYS.find(x=>x.id===id);
+      if(g && g.joined < g.target){
+        g.joined++;
+        joinedGB[id] = true;
+        renderGroupBuys();
+        showToast(`Joined the ${g.title} group buy!`);
+      }
+    });
+  });
+}
+
+/* ========================= FILTER + SORT ========================= */
+function getFilteredProducts(){
+  let list = PRODUCTS.filter(p=>{
+    if(state.category !== "All" && p.category !== state.category) return false;
+    if(state.search && !(p.name.toLowerCase().includes(state.search) || p.hindi.includes(state.search) || p.village.toLowerCase().includes(state.search))) return false;
+    if(state.organicOnly && !p.organic) return false;
+    if(p.price > state.maxPrice) return false;
+    if(p.rating < state.minRating) return false;
+    if(p.distance > state.maxDistance) return false;
+    return true;
+  });
+  if(state.sort==="price-low") list.sort((a,b)=>a.price-b.price);
+  else if(state.sort==="price-high") list.sort((a,b)=>b.price-a.price);
+  else if(state.sort==="rating") list.sort((a,b)=>b.rating-a.rating);
+  return list;
+}
+
+/* ========================= RENDER: PRODUCT GRID ========================= */
+function renderGrid(){
+  const grid = document.getElementById("productGrid");
+  const list = getFilteredProducts();
+  document.getElementById("resultCount").textContent = `${list.length} item${list.length!==1?'s':''}`;
+
+  if(list.length === 0){
+    grid.innerHTML = `<div class="empty-state"><h3>No produce matches your filters</h3><p>Try widening your price range or clearing a filter.</p></div>`;
+    return;
+  }
+
+  grid.innerHTML = list.map(p=>{
+    const qty = cart[p.id] || 0;
+    return `
+    <div class="product-card">
+      <div class="product-media cat-${p.cat}" data-view="${p.id}">
+        ${p.badge ? `<span class="product-badge">${p.badge}</span>` : ""}
+        ${p.organic ? `<span class="organic-badge">Organic</span>` : ""}
+        <span class="emoji-wrap">${p.icon}</span>
+      </div>
+      <div class="product-body">
+        <div class="product-name" data-view="${p.id}">${p.name}</div>
+        <div class="product-hindi">${p.hindi}</div>
+        <div class="product-farmer">${p.farmer} · ${p.village}</div>
+        <div class="product-rating">
+          <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.77 5.82 21 7 14.14l-5-4.87 6.91-1.01L12 2z"/></svg>
+          ${p.rating}
+        </div>
+        <div class="product-price-row">
+          <span class="product-price">${fmt(p.price)}</span>
+          <span class="product-unit">/ ${p.unit}</span>
+        </div>
+      </div>
+      <div class="product-footer">
+        <div class="qty-stepper">
+          <button data-dec="${p.id}" aria-label="Decrease quantity">−</button>
+          <span id="qty-${p.id}">${qty}</span>
+          <button data-inc="${p.id}" aria-label="Increase quantity">+</button>
+        </div>
+        <button class="add-btn ${qty>0?'added':''}" data-add="${p.id}">${qty>0 ? 'In cart' : 'Add to cart'}</button>
+      </div>
+    </div>`;
+  }).join("");
+
+  // wire events
+  grid.querySelectorAll("[data-inc]").forEach(b=> b.addEventListener("click", ()=> stepQty(+b.dataset.inc, 1)));
+  grid.querySelectorAll("[data-dec]").forEach(b=> b.addEventListener("click", ()=> stepQty(+b.dataset.dec, -1)));
+  grid.querySelectorAll("[data-add]").forEach(b=> b.addEventListener("click", ()=> addToCart(+b.dataset.add)));
+  grid.querySelectorAll("[data-view]").forEach(el=> el.addEventListener("click", ()=> openQuickView(+el.dataset.view)));
+}
+
+function stepQty(id, delta){
+  const current = cart[id] || 0;
+  const next = Math.max(0, current + delta);
+  if(next === 0) delete cart[id]; else cart[id] = next;
+  document.getElementById(`qty-${id}`).textContent = cart[id] || 0;
+  renderCart();
+  syncAddButtons();
+}
+
+function addToCart(id){
+  const wasEmpty = !cart[id];
+  cart[id] = (cart[id] || 0) + 1;
+  document.getElementById(`qty-${id}`).textContent = cart[id];
+  const p = PRODUCTS.find(x=>x.id===id);
+  showToast(`${p.name} added to cart`);
+  renderCart();
+  syncAddButtons();
+}
+
+function syncAddButtons(){
+  document.querySelectorAll("[data-add]").forEach(btn=>{
+    const id = +btn.dataset.add;
+    const inCart = (cart[id]||0) > 0;
+    btn.classList.toggle("added", inCart);
+    btn.textContent = inCart ? "In cart" : "Add to cart";
+  });
+}
+
+/* ========================= RENDER: CART ========================= */
+function renderCart(){
+  const ids = Object.keys(cart).filter(id=>cart[id]>0);
+  const itemsHtml = ids.length === 0
+    ? `<div class="cart-empty">Your cart is empty.<br>Add some fresh produce to get started.</div>`
+    : ids.map(id=>{
+        const p = PRODUCTS.find(x=>x.id===+id);
+        const qty = cart[id];
+        return `
+        <div class="cart-item">
+          <div class="cart-item-icon cat-${p.cat}">${p.icon}</div>
+          <div class="cart-item-info">
+            <div class="name">${p.name}</div>
+            <div class="meta">${fmt(p.price)} / ${p.unit}</div>
+            <div class="cart-item-controls">
+              <button data-cdec="${p.id}">−</button>
+              <span>${qty}</span>
+              <button data-cinc="${p.id}">+</button>
+              <span class="cart-item-remove" data-cremove="${p.id}">Remove</span>
+            </div>
+          </div>
+        </div>`;
+      }).join("");
+
+  const subtotal = ids.reduce((sum,id)=>{
+    const p = PRODUCTS.find(x=>x.id===+id);
+    return sum + p.price * cart[id];
+  }, 0);
+  const delivery = subtotal === 0 ? 0 : (subtotal >= 500 ? 0 : 40);
+  const total = subtotal + delivery;
+  const totalItems = ids.reduce((s,id)=>s+cart[id],0);
+
+  const summaryHtml = `
+    <div class="summary-row"><span>Subtotal</span><span>${fmt(subtotal)}</span></div>
+    <div class="summary-row"><span>Delivery</span><span>${delivery===0 ? (subtotal>0?'Free':'—') : fmt(delivery)}</span></div>
+    <div class="summary-row total"><span>Total</span><span>${fmt(total)}</span></div>
+    <button class="checkout-btn" ${ids.length===0?'disabled':''} id="checkoutBtnInner">Proceed to checkout</button>
+    ${subtotal>0 && subtotal<500 ? `<div class="free-delivery-note">Add ${fmt(500-subtotal)} more for free delivery</div>` : ""}
+  `;
+
+  // desktop
+  document.getElementById("cartItemsDesktop").innerHTML = itemsHtml;
+  document.getElementById("cartSummaryDesktop").innerHTML = summaryHtml;
+  // mobile
+  document.getElementById("cartItemsMobile").innerHTML = itemsHtml;
+  document.getElementById("cartSummaryMobile").innerHTML = summaryHtml.replace('id="checkoutBtnInner"','id="checkoutBtnInnerMobile"');
+
+  document.getElementById("cartCountLabel").textContent = `${totalItems} item${totalItems!==1?'s':''}`;
+  document.getElementById("cartBadge").textContent = totalItems;
+  document.getElementById("fabLabel").textContent = `Cart · ${totalItems}`;
+
+  // wire cart-internal buttons (both copies)
+  document.querySelectorAll("[data-cinc]").forEach(b=> b.addEventListener("click", ()=> stepQty(+b.dataset.cinc, 1)));
+  document.querySelectorAll("[data-cdec]").forEach(b=> b.addEventListener("click", ()=> stepQty(+b.dataset.cdec, -1)));
+  document.querySelectorAll("[data-cremove]").forEach(b=> b.addEventListener("click", ()=>{
+    delete cart[+b.dataset.cremove];
+    renderCart();
+    syncAddButtons();
+    const qtyEl = document.getElementById(`qty-${b.dataset.cremove}`);
+    if(qtyEl) qtyEl.textContent = 0;
+  }));
+  const co1 = document.getElementById("checkoutBtnInner");
+  const co2 = document.getElementById("checkoutBtnInnerMobile");
+  [co1,co2].forEach(btn=>{
+    if(btn) btn.addEventListener("click", ()=> {
+      showToast("Heading to checkout…");
+      setTimeout(() => { window.location.href = "{% url 'checkout' %}"; }, 500);
+    });
+  });
+}
+
+/* ========================= QUICK VIEW MODAL ========================= */
+function openQuickView(id){
+  const p = PRODUCTS.find(x=>x.id===id);
+  const box = document.getElementById("modalBox");
+  box.innerHTML = `
+    <div class="modal-media cat-${p.cat}">
+      <button class="modal-close" id="modalCloseBtn" aria-label="Close">&times;</button>
+      ${p.icon}
+    </div>
+    <div class="modal-content">
+      <h3>${p.name} <span style="font-size:0.95rem; color:var(--text-soft); font-family:'Work Sans',sans-serif; font-weight:400;">(${p.hindi})</span></h3>
+      <div class="modal-farmer">Grown by ${p.farmer}, ${p.village} · ${p.distance} km away</div>
+      <div class="modal-trace">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        Scan the QR code on delivery to trace this ${p.name.toLowerCase()} back to ${p.farmer}'s farm and see the full price breakdown.
+      </div>
+      <div class="modal-price-row">
+        <span class="price">${fmt(p.price)}<span style="font-size:0.85rem; color:var(--text-soft); font-weight:500;"> / ${p.unit}</span></span>
+        <span class="product-rating">★ ${p.rating}</span>
+      </div>
+      <button class="add-btn" style="width:100%; padding:11px;" id="modalAddBtn">Add to cart</button>
+    </div>
+  `;
+  document.getElementById("modalOverlay").classList.add("open");
+  document.getElementById("modalCloseBtn").addEventListener("click", closeQuickView);
+  document.getElementById("modalAddBtn").addEventListener("click", ()=>{ addToCart(id); closeQuickView(); });
+}
+function closeQuickView(){ document.getElementById("modalOverlay").classList.remove("open"); }
+document.getElementById("modalOverlay").addEventListener("click", (e)=>{
+  if(e.target.id === "modalOverlay") closeQuickView();
+});
+
+/* ========================= EVENT WIRING ========================= */
+document.getElementById("searchInput").addEventListener("input", (e)=>{
+  state.search = e.target.value.trim().toLowerCase();
+  renderGrid();
+});
+document.getElementById("organicToggle").addEventListener("change", (e)=>{
+  state.organicOnly = e.target.checked;
+  renderGrid();
+});
+document.getElementById("sortSelect").addEventListener("change", (e)=>{
+  state.sort = e.target.value;
+  renderGrid();
+});
+document.getElementById("priceRange").addEventListener("input", (e)=>{
+  state.maxPrice = +e.target.value;
+  document.getElementById("priceVal").textContent = fmt(state.maxPrice);
+  renderGrid();
+});
+document.querySelectorAll('input[name="rating"]').forEach(r=>{
+  r.addEventListener("change", (e)=>{ state.minRating = +e.target.value; renderGrid(); });
+});
+document.querySelectorAll('input[name="dist"]').forEach(r=>{
+  r.addEventListener("change", (e)=>{ state.maxDistance = +e.target.value; renderGrid(); });
+});
+document.getElementById("clearFilters").addEventListener("click", ()=>{
+  state.maxPrice = 400; state.minRating = 0; state.maxDistance = 999;
+  document.getElementById("priceRange").value = 400;
+  document.getElementById("priceVal").textContent = fmt(400);
+  document.getElementById("r0").checked = true;
+  document.getElementById("d0").checked = true;
+  renderGrid();
+});
+
+// mobile cart drawer
+const drawer = document.getElementById("cartDrawer");
+const overlay = document.getElementById("drawerOverlay");
+function openDrawer(){ drawer.classList.add("open"); overlay.classList.add("open"); }
+function closeDrawer(){ drawer.classList.remove("open"); overlay.classList.remove("open"); }
+document.getElementById("cartFab").addEventListener("click", openDrawer);
+document.getElementById("cartIconBtn").addEventListener("click", openDrawer);
+document.getElementById("drawerClose").addEventListener("click", closeDrawer);
+overlay.addEventListener("click", closeDrawer);
+
+/* ========================= INIT ========================= */
+renderChips();
+renderGroupBuys();
+renderGrid();
+renderCart();
+</script>
+</body>
+</html>

@@ -1,0 +1,1144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Checkout · Farm2Door</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Karla:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --farm-green:#2E7D32;
+    --farm-green-light:#4CA150;
+    --farm-green-dark:#1F5723;
+    --turmeric:#F9A825;
+    --produce-orange:#FB8C00;
+    --earthy-brown:#6D4C41;
+    --bg:#FAFAFA;
+    --paper:#FFFFFF;
+    --ink:#332B27;
+    --body-text:#333333;
+    --muted:#8A7F79;
+    --line:#E7E1DA;
+    --error:#C24A3B;
+    --error-bg:#FBEBE8;
+    --radius-lg:18px;
+    --radius-md:12px;
+    --radius-sm:8px;
+    --shadow-soft: 0 1px 2px rgba(52,38,28,0.06), 0 8px 24px -12px rgba(52,38,28,0.18);
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    background-image:
+      radial-gradient(1200px 600px at 100% -10%, rgba(249,168,37,0.10), transparent 60%),
+      radial-gradient(900px 500px at -10% 110%, rgba(46,125,50,0.08), transparent 55%);
+    color:var(--body-text);
+    font-family:'Karla', sans-serif;
+    font-size:16px;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+    min-height:100vh;
+  }
+
+  h1,h2,h3{
+    font-family:'Fraunces', serif;
+    color:var(--earthy-brown);
+    margin:0;
+    font-weight:600;
+    letter-spacing:-0.01em;
+  }
+
+  a{color:inherit;}
+
+  button{font-family:inherit;}
+
+  ::selection{background:rgba(249,168,37,0.35);}
+
+  /* Focus visibility */
+  a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, label:focus-within{
+    outline:3px solid rgba(46,125,50,0.45);
+    outline-offset:2px;
+  }
+
+  /* ---------------- Top bar ---------------- */
+  .topbar{
+    background:var(--farm-green);
+    color:#fff;
+    position:sticky;
+    top:0;
+    z-index:40;
+  }
+  .topbar-inner{
+    max-width:1160px;
+    margin:0 auto;
+    padding:14px 24px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:16px;
+  }
+  .brand{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-family:'Fraunces', serif;
+    font-weight:700;
+    font-size:1.15rem;
+    color:#fff;
+    text-decoration:none;
+  }
+  .brand-mark{
+    width:30px;height:30px;
+    border-radius:50%;
+    background:var(--turmeric);
+    display:flex;align-items:center;justify-content:center;
+    font-size:16px;
+    flex-shrink:0;
+  }
+  .brand-tag{
+    font-size:0.72rem;
+    color:rgba(255,255,255,0.78);
+    font-family:'Karla',sans-serif;
+    font-weight:500;
+    display:block;
+    margin-top:1px;
+  }
+  .brand-text{display:flex;flex-direction:column;line-height:1.1;}
+
+  .secure-pill{
+    display:flex;align-items:center;gap:6px;
+    background:rgba(255,255,255,0.14);
+    padding:6px 12px;
+    border-radius:999px;
+    font-size:0.8rem;
+    color:#fff;
+  }
+
+  /* ---------------- Progress ---------------- */
+  .progress-wrap{
+    max-width:1160px;
+    margin:0 auto;
+    padding:22px 24px 4px;
+  }
+  .progress{
+    display:flex;
+    align-items:center;
+    gap:0;
+    max-width:520px;
+    margin:0 auto;
+  }
+  .progress .step{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:8px;
+    flex:1;
+    position:relative;
+  }
+  .progress .dot{
+    width:30px;height:30px;
+    border-radius:50%;
+    background:var(--paper);
+    border:2px solid var(--line);
+    color:var(--muted);
+    display:flex;align-items:center;justify-content:center;
+    font-weight:700;
+    font-size:0.85rem;
+    transition:all .3s ease;
+    z-index:2;
+  }
+  .progress .label{
+    font-size:0.78rem;
+    color:var(--muted);
+    font-weight:600;
+  }
+  .progress .bar{
+    position:absolute;
+    top:15px;
+    left:calc(-50% + 15px);
+    right:calc(50% + 15px);
+    height:2px;
+    background:var(--line);
+    z-index:1;
+  }
+  .progress .step:first-child .bar{display:none;}
+  .progress .step.done .dot{background:var(--farm-green); border-color:var(--farm-green); color:#fff;}
+  .progress .step.done .label{color:var(--farm-green-dark);}
+  .progress .step.done .bar{background:var(--farm-green);}
+  .progress .step.active .dot{background:#fff; border-color:var(--farm-green); color:var(--farm-green); box-shadow:0 0 0 4px rgba(46,125,50,0.15);}
+  .progress .step.active .label{color:var(--ink);}
+
+  /* ---------------- Layout ---------------- */
+  .page{
+    max-width:1160px;
+    margin:0 auto;
+    padding:28px 24px 80px;
+    display:grid;
+    grid-template-columns:1.35fr 1fr;
+    gap:28px;
+    align-items:start;
+  }
+
+  .panel{
+    background:var(--paper);
+    border-radius:var(--radius-lg);
+    box-shadow:var(--shadow-soft);
+    border:1px solid var(--line);
+  }
+
+  .panel-head{
+    padding:22px 26px 4px;
+  }
+  .panel-head h2{
+    font-size:1.3rem;
+  }
+  .panel-head p{
+    margin:6px 0 0;
+    color:var(--muted);
+    font-size:0.9rem;
+  }
+  .panel-body{padding:18px 26px 26px;}
+
+  /* ---------------- Cart summary table ---------------- */
+  .cart-table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:6px;
+  }
+  .cart-table thead th{
+    text-align:left;
+    font-size:0.72rem;
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+    color:var(--muted);
+    font-weight:700;
+    padding:0 4px 10px;
+    border-bottom:1px solid var(--line);
+  }
+  .cart-table thead th.num, .cart-table td.num{text-align:right;}
+  .cart-table tbody td{
+    padding:14px 4px;
+    border-bottom:1px solid var(--line);
+    vertical-align:middle;
+  }
+  .cart-table tbody tr:last-child td{border-bottom:none;}
+
+  .produce{
+    display:flex;
+    align-items:center;
+    gap:12px;
+  }
+  .produce-thumb{
+    width:48px;height:48px;
+    border-radius:10px;
+    background:#F1F6EF;
+    display:flex;align-items:center;justify-content:center;
+    font-size:22px;
+    flex-shrink:0;
+    border:1px solid var(--line);
+  }
+  .produce-name{font-weight:600; color:var(--ink); font-size:0.95rem;}
+  .produce-farmer{font-size:0.78rem; color:var(--muted); margin-top:2px;}
+  .qty-stepper{
+    display:inline-flex;
+    align-items:center;
+    border:1px solid var(--line);
+    border-radius:999px;
+    overflow:hidden;
+  }
+  .qty-stepper button{
+    background:none;border:none;
+    width:26px;height:26px;
+    color:var(--farm-green-dark);
+    font-size:1rem;
+    cursor:pointer;
+  }
+  .qty-stepper button:hover{background:#F1F6EF;}
+  .qty-stepper .qty-val{
+    min-width:26px;
+    text-align:center;
+    font-weight:700;
+    font-size:0.88rem;
+  }
+  .line-total{font-weight:700; color:var(--ink);}
+
+  .promo-row{
+    display:flex;
+    gap:10px;
+    margin-top:18px;
+  }
+  .promo-row input{
+    flex:1;
+    padding:11px 14px;
+    border-radius:999px;
+    border:1px solid var(--line);
+    font-size:0.9rem;
+    font-family:inherit;
+  }
+  .promo-row input:focus{border-color:var(--farm-green); outline:none;}
+  .btn-ghost{
+    padding:11px 18px;
+    border-radius:999px;
+    border:1px solid var(--farm-green);
+    background:#fff;
+    color:var(--farm-green-dark);
+    font-weight:700;
+    font-size:0.85rem;
+    cursor:pointer;
+    white-space:nowrap;
+    transition:background .2s ease;
+  }
+  .btn-ghost:hover{background:#F1F6EF;}
+  .promo-msg{
+    font-size:0.82rem;
+    margin-top:8px;
+    color:var(--farm-green-dark);
+    display:none;
+  }
+  .promo-msg.show{display:block;}
+
+  /* Impact strip */
+  .impact-strip{
+    margin-top:20px;
+    background:#F5F8F0;
+    border:1px dashed var(--farm-green-light);
+    border-radius:var(--radius-md);
+    padding:14px 16px;
+    display:flex;
+    gap:12px;
+    align-items:flex-start;
+    font-size:0.85rem;
+    color:var(--farm-green-dark);
+  }
+  .impact-strip .ic{font-size:1.2rem; line-height:1;}
+
+  /* ---------------- Delivery + Payment ---------------- */
+  .field-group{margin-bottom:18px;}
+  .field-group:last-child{margin-bottom:0;}
+  .field-row{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:14px;
+  }
+  label{
+    display:block;
+    font-size:0.8rem;
+    font-weight:700;
+    color:var(--ink);
+    margin-bottom:6px;
+  }
+  .req{color:var(--produce-orange);}
+  input[type="text"], input[type="tel"], select{
+    width:100%;
+    padding:12px 14px;
+    border-radius:var(--radius-sm);
+    border:1.5px solid var(--line);
+    font-size:0.92rem;
+    font-family:inherit;
+    color:var(--ink);
+    background:#fff;
+    transition:border-color .15s ease;
+  }
+  input:focus, select:focus{
+    border-color:var(--farm-green);
+    outline:none;
+  }
+  .hint{font-size:0.76rem; color:var(--muted); margin-top:5px;}
+  .error-text{
+    font-size:0.78rem;
+    color:var(--error);
+    margin-top:5px;
+    display:none;
+    font-weight:600;
+  }
+  .field-group.invalid input, .field-group.invalid select{
+    border-color:var(--error);
+    background:var(--error-bg);
+  }
+  .field-group.invalid .error-text{display:block;}
+  .field-group.valid input, .field-group.valid select{
+    border-color:var(--farm-green-light);
+  }
+
+  .divider{
+    height:1px;
+    background:var(--line);
+    margin:24px 0;
+  }
+
+  /* Payment method cards */
+  .pay-methods{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:10px;
+    margin-bottom:18px;
+  }
+  .pay-method{
+    border:1.5px solid var(--line);
+    border-radius:var(--radius-md);
+    padding:14px 10px;
+    text-align:center;
+    cursor:pointer;
+    background:#fff;
+    transition:border-color .15s ease, background .15s ease;
+    position:relative;
+  }
+  .pay-method .ic{font-size:1.4rem; display:block; margin-bottom:6px;}
+  .pay-method .name{font-size:0.8rem; font-weight:700; color:var(--ink);}
+  .pay-method input{position:absolute; opacity:0; pointer-events:none;}
+  .pay-method:hover{border-color:var(--farm-green-light);}
+  .pay-method.selected{
+    border-color:var(--farm-green);
+    background:#F1F6EF;
+  }
+  .pay-method.selected .name{color:var(--farm-green-dark);}
+  .pay-method.selected::after{
+    content:"✓";
+    position:absolute;
+    top:8px; right:8px;
+    width:16px;height:16px;
+    border-radius:50%;
+    background:var(--farm-green);
+    color:#fff;
+    font-size:10px;
+    display:flex;align-items:center;justify-content:center;
+    font-weight:700;
+  }
+
+  .pay-detail{
+    background:#FBF8F2;
+    border-radius:var(--radius-md);
+    padding:16px;
+    margin-top:4px;
+  }
+  .pay-detail-section{display:none;}
+  .pay-detail-section.active{display:block;}
+
+  .card-visual{
+    background:linear-gradient(135deg, var(--earthy-brown), #543a30);
+    border-radius:14px;
+    padding:18px 20px;
+    color:#fff;
+    margin-bottom:16px;
+    font-family:'Karla',sans-serif;
+    box-shadow:0 8px 20px -10px rgba(109,76,65,0.6);
+  }
+  .card-visual .num{
+    font-size:1.15rem;
+    letter-spacing:0.12em;
+    margin:18px 0 14px;
+    font-weight:600;
+  }
+  .card-visual .meta{
+    display:flex;
+    justify-content:space-between;
+    font-size:0.72rem;
+    opacity:0.85;
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+  }
+  .card-visual .brand-chip{
+    display:flex; justify-content:space-between; align-items:center;
+  }
+  .chip-icon{
+    width:32px;height:24px;
+    border-radius:5px;
+    background:rgba(249,168,37,0.85);
+  }
+
+  .upi-box{
+    display:flex;
+    gap:10px;
+  }
+  .upi-box input{flex:1;}
+
+  .cod-note{
+    display:flex;
+    gap:10px;
+    align-items:flex-start;
+    font-size:0.85rem;
+    color:var(--ink);
+  }
+  .cod-note .ic{font-size:1.3rem;}
+
+  /* ---------------- Order summary sidebar ---------------- */
+  .summary-panel{position:sticky; top:96px;}
+  .summary-rows{display:flex; flex-direction:column; gap:11px;}
+  .summary-row{
+    display:flex;
+    justify-content:space-between;
+    font-size:0.9rem;
+    color:var(--body-text);
+  }
+  .summary-row .label-sm{color:var(--muted);}
+  .summary-row.discount{color:var(--farm-green-dark); font-weight:600;}
+  .summary-total{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    padding-top:16px;
+    margin-top:6px;
+    border-top:1px dashed var(--line);
+    font-family:'Fraunces',serif;
+    font-weight:600;
+    color:var(--ink);
+  }
+  .summary-total .amt{font-size:1.5rem; color:var(--farm-green-dark);}
+
+  .eta-box{
+    margin-top:18px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    background:#FFF6E8;
+    border:1px solid rgba(249,168,37,0.4);
+    border-radius:var(--radius-md);
+    padding:12px 14px;
+    font-size:0.85rem;
+    color:var(--earthy-brown);
+  }
+
+  .place-order-btn{
+    width:100%;
+    margin-top:20px;
+    padding:16px;
+    border:none;
+    border-radius:999px;
+    background:var(--farm-green);
+    color:#fff;
+    font-weight:700;
+    font-size:1rem;
+    cursor:pointer;
+    transition:background .2s ease, transform .1s ease;
+    box-shadow:0 10px 24px -10px rgba(46,125,50,0.55);
+  }
+  .place-order-btn:hover{background:var(--farm-green-light);}
+  .place-order-btn:active{transform:translateY(1px);}
+  .place-order-btn[disabled]{opacity:0.65; cursor:progress;}
+
+  .trust-row{
+    display:flex;
+    justify-content:center;
+    gap:16px;
+    margin-top:16px;
+    font-size:0.74rem;
+    color:var(--muted);
+  }
+  .trust-row span{display:flex; align-items:center; gap:5px;}
+
+  /* ---------------- Confirmation ---------------- */
+  .confirm-overlay{
+    position:fixed;
+    inset:0;
+    background:rgba(51,43,39,0.55);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    z-index:100;
+    padding:20px;
+  }
+  .confirm-overlay.show{display:flex;}
+  .confirm-card{
+    background:#fff;
+    border-radius:24px;
+    padding:44px 36px 36px;
+    max-width:420px;
+    width:100%;
+    text-align:center;
+    box-shadow:0 30px 60px -20px rgba(0,0,0,0.35);
+    transform:translateY(18px) scale(0.96);
+    opacity:0;
+    transition:transform .35s cubic-bezier(.2,.8,.2,1), opacity .35s ease;
+  }
+  .confirm-overlay.show .confirm-card{
+    transform:translateY(0) scale(1);
+    opacity:1;
+  }
+
+  .check-wrap{
+    width:88px;height:88px;
+    margin:0 auto 20px;
+    position:relative;
+  }
+  .check-circle{
+    stroke:var(--farm-green);
+    stroke-width:3;
+    fill:none;
+    stroke-dasharray:245;
+    stroke-dashoffset:245;
+    animation:draw-circle .55s ease forwards;
+  }
+  .check-mark{
+    stroke:var(--farm-green);
+    stroke-width:4;
+    fill:none;
+    stroke-linecap:round;
+    stroke-linejoin:round;
+    stroke-dasharray:36;
+    stroke-dashoffset:36;
+    animation:draw-check .35s ease forwards .5s;
+  }
+  @keyframes draw-circle{to{stroke-dashoffset:0;}}
+  @keyframes draw-check{to{stroke-dashoffset:0;}}
+
+  .confirm-card h2{font-size:1.5rem; margin-bottom:8px;}
+  .confirm-card p.sub{color:var(--muted); font-size:0.92rem; margin:0 0 22px;}
+  .confirm-order-id{
+    background:#F5F8F0;
+    border-radius:var(--radius-md);
+    padding:12px 16px;
+    font-size:0.85rem;
+    color:var(--farm-green-dark);
+    font-weight:700;
+    letter-spacing:0.02em;
+    margin-bottom:22px;
+  }
+  .confirm-actions{
+    display:flex;
+    gap:10px;
+  }
+  .confirm-actions button{
+    flex:1;
+    padding:13px;
+    border-radius:999px;
+    font-weight:700;
+    font-size:0.88rem;
+    cursor:pointer;
+    border:none;
+  }
+  .confirm-actions .primary{background:var(--farm-green); color:#fff;}
+  .confirm-actions .primary:hover{background:var(--farm-green-light);}
+  .confirm-actions .secondary{background:#fff; color:var(--earthy-brown); border:1.5px solid var(--line);}
+  .confirm-actions .secondary:hover{background:#FAF7F3;}
+
+  @media (prefers-reduced-motion: reduce){
+    .check-circle, .check-mark, .confirm-card{animation:none !important; transition:none !important;}
+    .confirm-overlay.show .confirm-card{opacity:1; transform:none;}
+  }
+
+  /* ---------------- Responsive ---------------- */
+  @media (max-width: 880px){
+    .page{grid-template-columns:1fr;}
+    .summary-panel{position:static;}
+    .field-row{grid-template-columns:1fr;}
+    .pay-methods{grid-template-columns:1fr 1fr;}
+    .cart-table thead{display:none;}
+    .cart-table tbody td{display:block; border-bottom:none; padding:6px 4px;}
+    .cart-table tbody tr{
+      display:block;
+      border-bottom:1px solid var(--line);
+      padding:12px 0;
+    }
+    .cart-table td.num{text-align:left;}
+    .produce{margin-bottom:8px;}
+  }
+  @media (max-width:460px){
+    .pay-methods{grid-template-columns:1fr 1fr;}
+    .progress .label{font-size:0.68rem;}
+    .panel-head, .panel-body{padding-left:18px; padding-right:18px;}
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="{% url 'home' %}">
+      <span class="brand-mark">🌾</span>
+      <span class="brand-text">Farm2Door
+        <span class="brand-tag">From Farm to Family, Fairly</span>
+      </span>
+    </a>
+    <div class="secure-pill">🔒 Secure checkout</div>
+  </div>
+</div>
+
+<div class="progress-wrap">
+  <div class="progress">
+    <div class="step done">
+      <div class="bar"></div>
+      <div class="dot">✓</div>
+      <div class="label">Cart</div>
+    </div>
+    <div class="step active">
+      <div class="bar"></div>
+      <div class="dot">2</div>
+      <div class="label">Checkout</div>
+    </div>
+    <div class="step">
+      <div class="bar"></div>
+      <div class="dot">3</div>
+      <div class="label">Confirmed</div>
+    </div>
+  </div>
+</div>
+
+<form class="page" id="checkoutForm" novalidate>
+
+  <div class="main-col" style="display:flex; flex-direction:column; gap:22px;">
+
+    <!-- Cart summary -->
+    <section class="panel">
+      <div class="panel-head">
+        <h2>Your basket</h2>
+        <p>3 items from 2 farmer partners near Nashik &amp; Indore</p>
+      </div>
+      <div class="panel-body">
+        <table class="cart-table">
+          <thead>
+            <tr>
+              <th>Produce</th>
+              <th class="num">Price</th>
+              <th class="num">Qty</th>
+              <th class="num">Total</th>
+            </tr>
+          </thead>
+          <tbody id="cartBody">
+            <tr data-price="42">
+              <td>
+                <div class="produce">
+                  <div class="produce-thumb">🍅</div>
+                  <div>
+                    <div class="produce-name">Vine Tomatoes (1 kg)</div>
+                    <div class="produce-farmer">Sunita Farms, Nashik</div>
+                  </div>
+                </div>
+              </td>
+              <td class="num">₹42</td>
+              <td class="num">
+                <span class="qty-stepper">
+                  <button type="button" class="dec" aria-label="Decrease quantity">−</button>
+                  <span class="qty-val">2</span>
+                  <button type="button" class="inc" aria-label="Increase quantity">+</button>
+                </span>
+              </td>
+              <td class="num line-total">₹84</td>
+            </tr>
+            <tr data-price="58">
+              <td>
+                <div class="produce">
+                  <div class="produce-thumb">🥬</div>
+                  <div>
+                    <div class="produce-name">Organic Spinach (500 g)</div>
+                    <div class="produce-farmer">Ramesh Kisan FPO, Indore</div>
+                  </div>
+                </div>
+              </td>
+              <td class="num">₹58</td>
+              <td class="num">
+                <span class="qty-stepper">
+                  <button type="button" class="dec" aria-label="Decrease quantity">−</button>
+                  <span class="qty-val">1</span>
+                  <button type="button" class="inc" aria-label="Increase quantity">+</button>
+                </span>
+              </td>
+              <td class="num line-total">₹58</td>
+            </tr>
+            <tr data-price="96">
+              <td>
+                <div class="produce">
+                  <div class="produce-thumb">🥭</div>
+                  <div>
+                    <div class="produce-name">Alphonso Mangoes (1 kg)</div>
+                    <div class="produce-farmer">Sunita Farms, Nashik</div>
+                  </div>
+                </div>
+              </td>
+              <td class="num">₹96</td>
+              <td class="num">
+                <span class="qty-stepper">
+                  <button type="button" class="dec" aria-label="Decrease quantity">−</button>
+                  <span class="qty-val">3</span>
+                  <button type="button" class="inc" aria-label="Increase quantity">+</button>
+                </span>
+              </td>
+              <td class="num line-total">₹288</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="promo-row">
+          <input type="text" id="promoInput" placeholder="Have a promo code? Try HARVEST10">
+          <button type="button" class="btn-ghost" id="applyPromo">Apply</button>
+        </div>
+        <div class="promo-msg" id="promoMsg">✓ HARVEST10 applied — ₹10 off your order</div>
+
+        <div class="impact-strip">
+          <span class="ic">🌱</span>
+          <span>82% of what you pay for this basket reaches Sunita and Ramesh directly — no middlemen mandi cuts.</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Delivery details -->
+    <section class="panel">
+      <div class="panel-head">
+        <h2>Delivery details</h2>
+        <p>Where should we drop off your fresh produce?</p>
+      </div>
+      <div class="panel-body">
+        <div class="field-group" id="fg-name">
+          <label for="fullName">Full name <span class="req">*</span></label>
+          <input type="text" id="fullName" placeholder="e.g. Anjali Mehta" required>
+          <div class="error-text">Enter the name we should deliver to.</div>
+        </div>
+
+        <div class="field-row">
+          <div class="field-group" id="fg-phone">
+            <label for="phone">Mobile number <span class="req">*</span></label>
+            <input type="tel" id="phone" placeholder="10-digit mobile number" maxlength="10" required>
+            <div class="error-text">Enter a valid 10-digit mobile number.</div>
+          </div>
+          <div class="field-group" id="fg-pincode">
+            <label for="pincode">Pincode <span class="req">*</span></label>
+            <input type="text" id="pincode" placeholder="e.g. 452001" maxlength="6" required>
+            <div class="error-text">Enter a valid 6-digit pincode.</div>
+          </div>
+        </div>
+
+        <div class="field-group" id="fg-address">
+          <label for="address">Address <span class="req">*</span></label>
+          <input type="text" id="address" placeholder="House / flat, street, landmark" required>
+          <div class="error-text">Tell us where to deliver your order.</div>
+        </div>
+
+        <div class="field-row">
+          <div class="field-group" id="fg-city">
+            <label for="city">City <span class="req">*</span></label>
+            <input type="text" id="city" placeholder="e.g. Indore" required>
+            <div class="error-text">Enter your city.</div>
+          </div>
+          <div class="field-group">
+            <label for="slot">Delivery slot</label>
+            <select id="slot">
+              <option>Tomorrow, 7:00 – 9:00 AM</option>
+              <option>Tomorrow, 5:00 – 7:00 PM</option>
+              <option>Day after, 7:00 – 9:00 AM</option>
+            </select>
+            <div class="hint">Farm-fresh picks are packed the night before delivery.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Payment -->
+    <section class="panel">
+      <div class="panel-head">
+        <h2>Payment</h2>
+        <p>Choose how you'd like to pay</p>
+      </div>
+      <div class="panel-body">
+        <div class="pay-methods" role="radiogroup" aria-label="Payment method">
+          <label class="pay-method selected" data-target="pay-upi">
+            <input type="radio" name="paymethod" value="upi" checked>
+            <span class="ic">📱</span>
+            <span class="name">UPI</span>
+          </label>
+          <label class="pay-method" data-target="pay-card">
+            <input type="radio" name="paymethod" value="card">
+            <span class="ic">💳</span>
+            <span class="name">Card</span>
+          </label>
+          <label class="pay-method" data-target="pay-cod">
+            <input type="radio" name="paymethod" value="cod">
+            <span class="ic">🚚</span>
+            <span class="name">Cash on Delivery</span>
+          </label>
+        </div>
+
+        <div class="pay-detail">
+          <div class="pay-detail-section active" id="pay-upi">
+            <label for="upiId">UPI ID</label>
+            <div class="upi-box">
+              <input type="text" id="upiId" placeholder="yourname@bank">
+              <button type="button" class="btn-ghost">Verify</button>
+            </div>
+            <div class="hint">You'll get a payment request on your UPI app after placing the order.</div>
+          </div>
+
+          <div class="pay-detail-section" id="pay-card">
+            <div class="card-visual">
+              <div class="brand-chip">
+                <div class="chip-icon"></div>
+                <span style="font-size:0.7rem; opacity:0.8;">CREDIT / DEBIT</span>
+              </div>
+              <div class="num" id="cardPreview">•••• •••• •••• ••••</div>
+              <div class="meta">
+                <span id="namePreview">CARDHOLDER NAME</span>
+                <span id="expPreview">MM/YY</span>
+              </div>
+            </div>
+            <div class="field-row">
+              <div class="field-group" style="grid-column:1/-1;">
+                <label for="cardNum">Card number</label>
+                <input type="text" id="cardNum" placeholder="1234 5678 9012 3456" maxlength="19">
+              </div>
+            </div>
+            <div class="field-row">
+              <div class="field-group">
+                <label for="cardExp">Expiry</label>
+                <input type="text" id="cardExp" placeholder="MM/YY" maxlength="5">
+              </div>
+              <div class="field-group">
+                <label for="cardCvv">CVV</label>
+                <input type="text" id="cardCvv" placeholder="•••" maxlength="3">
+              </div>
+            </div>
+          </div>
+
+          <div class="pay-detail-section" id="pay-cod">
+            <div class="cod-note">
+              <span class="ic">💵</span>
+              <span>Pay in cash when your delivery partner arrives. A small ₹15 handling fee applies for Cash on Delivery orders.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- Order summary -->
+  <aside class="panel summary-panel">
+    <div class="panel-head">
+      <h2>Order summary</h2>
+    </div>
+    <div class="panel-body">
+      <div class="summary-rows">
+        <div class="summary-row"><span class="label-sm">Subtotal (3 items)</span><span id="sumSubtotal">₹430</span></div>
+        <div class="summary-row"><span class="label-sm">Delivery fee</span><span id="sumDelivery">₹20</span></div>
+        <div class="summary-row"><span class="label-sm">Cash handling fee</span><span id="sumCodFee">₹0</span></div>
+        <div class="summary-row discount" id="sumDiscountRow" style="display:none;"><span>Promo (HARVEST10)</span><span id="sumDiscount">−₹10</span></div>
+      </div>
+      <div class="summary-total">
+        <span>Total</span>
+        <span class="amt" id="sumTotal">₹450</span>
+      </div>
+
+      <div class="eta-box">
+        <span>⏱️</span>
+        <span>Estimated delivery: <strong>tomorrow morning</strong>, packed direct from farm.</span>
+      </div>
+
+      <button type="submit" class="place-order-btn" id="placeOrderBtn">Place order · ₹450</button>
+
+      <div class="trust-row">
+        <span>🔒 Encrypted payment</span>
+        <span>↩ Easy returns</span>
+      </div>
+    </div>
+  </aside>
+
+</form>
+
+<!-- Confirmation overlay -->
+<div class="confirm-overlay" id="confirmOverlay" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
+  <div class="confirm-card">
+    <div class="check-wrap">
+      <svg width="88" height="88" viewBox="0 0 88 88">
+        <circle class="check-circle" cx="44" cy="44" r="39"></circle>
+        <polyline class="check-mark" points="27,45 39,57 62,32"></polyline>
+      </svg>
+    </div>
+    <h2 id="confirmTitle">Order placed!</h2>
+    <p class="sub">Sunita and Ramesh have been notified and will start packing shortly.</p>
+    <div class="confirm-order-id" id="confirmOrderId">Order #F2D-48213 · ₹450</div>
+    <div class="confirm-actions">
+      <button type="button" class="secondary" id="viewCartAgain">Back to cart</button>
+      <button type="button" class="primary" id="trackOrderBtn">Track order</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const DELIVERY_FEE = 20;
+  const COD_FEE = 15;
+  let discount = 0;
+  let promoApplied = false;
+
+  const cartBody = document.getElementById('cartBody');
+
+  function currentSubtotal(){
+    let sub = 0;
+    cartBody.querySelectorAll('tr').forEach(row => {
+      const price = parseFloat(row.dataset.price);
+      const qty = parseInt(row.querySelector('.qty-val').textContent, 10);
+      const lineTotal = price * qty;
+      row.querySelector('.line-total').textContent = '₹' + lineTotal;
+      sub += lineTotal;
+    });
+    return sub;
+  }
+
+  function selectedPayMethod(){
+    return document.querySelector('input[name="paymethod"]:checked').value;
+  }
+
+  function recalc(){
+    const sub = currentSubtotal();
+    const codFee = selectedPayMethod() === 'cod' ? COD_FEE : 0;
+    const total = sub + DELIVERY_FEE + codFee - discount;
+
+    document.getElementById('sumSubtotal').textContent = '₹' + sub;
+    document.getElementById('sumDelivery').textContent = '₹' + DELIVERY_FEE;
+    document.getElementById('sumCodFee').textContent = '₹' + codFee;
+    document.getElementById('sumDiscountRow').style.display = discount ? 'flex' : 'none';
+    document.getElementById('sumDiscount').textContent = '−₹' + discount;
+    document.getElementById('sumTotal').textContent = '₹' + total;
+    document.getElementById('placeOrderBtn').textContent = 'Place order · ₹' + total;
+
+    const itemCount = Array.from(cartBody.querySelectorAll('.qty-val'))
+      .reduce((n, el) => n + parseInt(el.textContent, 10), 0);
+    document.querySelector('.panel-head p').textContent =
+      itemCount + (itemCount === 1 ? ' item' : ' items') + ' from 2 farmer partners near Nashik & Indore';
+
+    return total;
+  }
+
+  // Quantity steppers
+  cartBody.addEventListener('click', (e) => {
+    const btn = e.target.closest('button');
+    if(!btn) return;
+    const valEl = btn.parentElement.querySelector('.qty-val');
+    let qty = parseInt(valEl.textContent, 10);
+    if(btn.classList.contains('inc')) qty = Math.min(qty + 1, 20);
+    if(btn.classList.contains('dec')) qty = Math.max(qty - 1, 1);
+    valEl.textContent = qty;
+    recalc();
+  });
+
+  // Promo code
+  document.getElementById('applyPromo').addEventListener('click', () => {
+    const val = document.getElementById('promoInput').value.trim().toUpperCase();
+    const msg = document.getElementById('promoMsg');
+    if(val === 'HARVEST10' && !promoApplied){
+      discount = 10;
+      promoApplied = true;
+      msg.classList.add('show');
+      recalc();
+    } else if(promoApplied){
+      msg.textContent = 'Promo already applied to this order.';
+      msg.classList.add('show');
+    } else {
+      msg.textContent = '✕ That code isn\'t valid. Try HARVEST10.';
+      msg.style.color = 'var(--error)';
+      msg.classList.add('show');
+    }
+  });
+
+  // Payment method switching
+  document.querySelectorAll('.pay-method').forEach(el => {
+    el.addEventListener('click', () => {
+      document.querySelectorAll('.pay-method').forEach(x => x.classList.remove('selected'));
+      el.classList.add('selected');
+      el.querySelector('input').checked = true;
+
+      document.querySelectorAll('.pay-detail-section').forEach(s => s.classList.remove('active'));
+      document.getElementById(el.dataset.target).classList.add('active');
+      recalc();
+    });
+  });
+
+  // Card preview live formatting
+  const cardNum = document.getElementById('cardNum');
+  const cardPreview = document.getElementById('cardPreview');
+  cardNum.addEventListener('input', () => {
+    let digits = cardNum.value.replace(/\D/g,'').slice(0,16);
+    cardNum.value = digits.replace(/(.{4})/g,'$1 ').trim();
+    const masked = digits.padEnd(16,'•').replace(/(.{4})/g,'$1 ').trim();
+    cardPreview.textContent = masked;
+  });
+  document.getElementById('fullName').addEventListener('input', function(){
+    document.getElementById('namePreview').textContent = this.value.trim().toUpperCase() || 'CARDHOLDER NAME';
+  });
+  const cardExp = document.getElementById('cardExp');
+  cardExp.addEventListener('input', () => {
+    let v = cardExp.value.replace(/\D/g,'').slice(0,4);
+    if(v.length >= 3) v = v.slice(0,2) + '/' + v.slice(2);
+    cardExp.value = v;
+    document.getElementById('expPreview').textContent = v || 'MM/YY';
+  });
+
+  // Phone / pincode digit-only input
+  document.getElementById('phone').addEventListener('input', function(){
+    this.value = this.value.replace(/\D/g,'').slice(0,10);
+  });
+  document.getElementById('pincode').addEventListener('input', function(){
+    this.value = this.value.replace(/\D/g,'').slice(0,6);
+  });
+
+  // ---- Validation ----
+  const validators = {
+    fullName: v => v.trim().length >= 2,
+    phone: v => /^[6-9]\d{9}$/.test(v.trim()),
+    pincode: v => /^\d{6}$/.test(v.trim()),
+    address: v => v.trim().length >= 5,
+    city: v => v.trim().length >= 2,
+  };
+
+  function validateField(id){
+    const input = document.getElementById(id);
+    const group = document.getElementById('fg-' + id.replace('fullName','name'));
+    const valid = validators[id](input.value);
+    group.classList.toggle('invalid', !valid);
+    group.classList.toggle('valid', valid);
+    return valid;
+  }
+
+  Object.keys(validators).forEach(id => {
+    document.getElementById(id).addEventListener('blur', () => validateField(id));
+  });
+
+  function validateAll(){
+    return Object.keys(validators).map(validateField).every(Boolean);
+  }
+
+  // ---- Submit ----
+  const form = document.getElementById('checkoutForm');
+  const overlay = document.getElementById('confirmOverlay');
+  const placeBtn = document.getElementById('placeOrderBtn');
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    if(!validateAll()){
+      const firstInvalid = form.querySelector('.field-group.invalid input, .field-group.invalid select');
+      if(firstInvalid) firstInvalid.scrollIntoView({behavior:'smooth', block:'center'});
+      return;
+    }
+
+    const total = recalc();
+    placeBtn.disabled = true;
+    placeBtn.textContent = 'Placing your order…';
+
+    let lastOrderId = '';
+    setTimeout(() => {
+      placeBtn.disabled = false;
+      lastOrderId = 'F2D-' + Math.floor(10000 + Math.random()*89999);
+      document.getElementById('confirmOrderId').textContent = 'Order #' + lastOrderId + ' · ₹' + total;
+      overlay.classList.add('show');
+      // restart checkmark animation
+      const circle = overlay.querySelector('.check-circle');
+      const mark = overlay.querySelector('.check-mark');
+      [circle, mark].forEach(el => { el.style.animation = 'none'; void el.offsetWidth; el.style.animation = ''; });
+
+      document.getElementById('trackOrderBtn').onclick = () => {
+        window.location.href = '{% url 'traceability' %}?qr=' + lastOrderId;
+      };
+    }, 900);
+  });
+
+  document.getElementById('viewCartAgain').addEventListener('click', () => {
+    overlay.classList.remove('show');
+    window.location.href = '{% url 'marketplace' %}';
+  });
+
+  recalc();
+})();
+</script>
+
+</body>
+</html>

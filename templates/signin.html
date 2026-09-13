@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Farm2Door — Sign In</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,500;0,600;0,700;1,500&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --farm-green:#2E7D32;
+    --farm-green-light:#4CAF50;
+    --farm-green-tint:#DCEDC8;
+    --turmeric:#F9A825;
+    --orange:#FB8C00;
+    --brown:#6D4C41;
+    --bg:#FAFAFA;
+    --text:#333333;
+    --text-soft:#6b6b6b;
+    --white:#FFFFFF;
+    --error:#C0392B;
+    --shadow-sm: 0 2px 8px rgba(46,30,10,0.06);
+    --shadow-md: 0 10px 30px rgba(46,30,10,0.12);
+    --radius-lg: 20px;
+    --radius-md: 12px;
+    --radius-pill: 999px;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{font-family:'Work Sans', sans-serif; background:var(--bg); color:var(--text); line-height:1.5; -webkit-font-smoothing:antialiased; font-size:16px;}
+  h1,h2,h3{font-family:'Fraunces', serif; color:var(--brown); font-weight:700; line-height:1.2;}
+  button{font-family:inherit; cursor:pointer; border:none;}
+  input{font-family:inherit;}
+  a{color:inherit; text-decoration:none;}
+  :focus-visible{outline:3px solid var(--farm-green-light); outline-offset:2px; border-radius:4px;}
+
+  /* ---------- TOP BAR ---------- */
+  .topbar{
+    background:var(--farm-green); color:var(--white); padding:14px 28px;
+    display:flex; align-items:center; justify-content:space-between; box-shadow:var(--shadow-sm);
+  }
+  .brand{display:flex; align-items:center; gap:10px;}
+  .brand svg{width:28px; height:28px;}
+  .brand-name{font-family:'Fraunces', serif; font-weight:700; font-size:1.15rem;}
+  .help-link{font-size:0.85rem; font-weight:600; opacity:0.9; display:flex; align-items:center; gap:6px;}
+  .help-link:hover{opacity:1; text-decoration:underline;}
+  .help-link svg{width:15px; height:15px;}
+
+  /* ---------- LAYOUT ---------- */
+  .auth-wrap{display:grid; grid-template-columns:1.05fr 1fr; min-height:calc(100vh - 60px);}
+  @media (max-width:860px){ .auth-wrap{grid-template-columns:1fr;} }
+
+  /* ---------- ILLUSTRATION PANEL ---------- */
+  .illustration-panel{
+    position:relative; overflow:hidden; background:linear-gradient(160deg, var(--farm-green), #1f5723);
+    color:var(--white); padding:50px 44px; display:flex; flex-direction:column; justify-content:center;
+    animation:fadeIn 0.7s ease both;
+  }
+  @keyframes fadeIn{from{opacity:0;} to{opacity:1;}}
+  @media (max-width:860px){ .illustration-panel{padding:34px 24px; min-height:260px; justify-content:flex-start;} }
+
+  .blob{position:absolute; border-radius:50%; filter:blur(2px); opacity:0.18;}
+  .blob1{width:260px; height:260px; background:var(--turmeric); top:-60px; right:-60px;}
+  .blob2{width:200px; height:200px; background:var(--orange); bottom:-50px; left:-40px;}
+
+  .float-icons{position:absolute; inset:0; pointer-events:none;}
+  .float-icon{position:absolute; font-size:2.1rem; opacity:0.85; animation:floaty 5s ease-in-out infinite;}
+  .float-icon:nth-child(2){animation-delay:1.2s;}
+  .float-icon:nth-child(3){animation-delay:2.4s;}
+  @keyframes floaty{0%,100%{transform:translateY(0);} 50%{transform:translateY(-14px);}}
+
+  .illustration-content{position:relative; z-index:1; max-width:420px;}
+  .illustration-content h1{color:var(--white); font-size:2rem; margin-bottom:14px; -webkit-text-fill-color:var(--white);}
+  .illustration-content p{font-size:1rem; opacity:0.92; margin-bottom:26px;}
+  .hindi-line{display:inline-block; font-size:0.95rem; font-weight:600; color:var(--brown);
+    background:var(--turmeric); padding:4px 12px; border-radius:var(--radius-pill); margin-bottom:18px;}
+
+  .stat-row{display:flex; gap:12px; flex-wrap:wrap;}
+  .stat-chip{background:rgba(255,255,255,0.14); border-radius:var(--radius-md); padding:12px 16px; min-width:110px;}
+  .stat-chip .num{font-family:'Fraunces',serif; font-size:1.3rem; font-weight:700;}
+  .stat-chip .lbl{font-size:0.72rem; opacity:0.85; margin-top:2px;}
+
+  /* ---------- FORM PANEL ---------- */
+  .form-panel{display:flex; align-items:center; justify-content:center; padding:40px 24px;}
+  .auth-card{
+    width:100%; max-width:420px; background:var(--white); border-radius:var(--radius-lg);
+    box-shadow:var(--shadow-md); padding:36px 32px; animation:fadeSlideUp 0.5s ease both;
+  }
+  @keyframes fadeSlideUp{from{opacity:0; transform:translateY(16px);} to{opacity:1; transform:translateY(0);}}
+  @media (max-width:480px){ .auth-card{padding:28px 20px; border-radius:var(--radius-md); box-shadow:none;} }
+
+  .auth-card h2{font-size:1.4rem; margin-bottom:6px;}
+  .auth-sub{color:var(--text-soft); font-size:0.9rem; margin-bottom:26px;}
+
+  /* ---------- STEP INDICATOR ---------- */
+  .step-indicator{display:flex; align-items:center; margin-bottom:30px;}
+  .step-unit{display:flex; flex-direction:column; align-items:center; flex:1; position:relative;}
+  .step-circle{
+    width:32px; height:32px; border-radius:50%; background:var(--white); border:2px solid #ddd6c8;
+    color:var(--text-soft); display:flex; align-items:center; justify-content:center;
+    font-size:0.82rem; font-weight:700; transition:all 0.25s ease; z-index:1;
+  }
+  .step-label{font-size:0.68rem; color:var(--text-soft); margin-top:6px; font-weight:600; text-align:center;}
+  .step-connector{position:absolute; top:15px; left:50%; width:100%; height:2px; background:#ddd6c8; z-index:0;}
+  .step-unit:last-child .step-connector{display:none;}
+  .step-unit.active .step-circle{background:var(--farm-green); border-color:var(--farm-green); color:var(--white);}
+  .step-unit.active .step-label{color:var(--brown);}
+  .step-unit.done .step-circle{background:var(--farm-green); border-color:var(--farm-green); color:var(--white);}
+  .step-unit.done .step-connector{background:var(--farm-green);}
+  .step-unit.done .step-circle svg{width:15px; height:15px;}
+
+  /* ---------- FORM ELEMENTS ---------- */
+  .form-step{display:none;}
+  .form-step.visible{display:block; animation:fadeSlideUp 0.35s ease both;}
+
+  label{display:block; font-size:0.85rem; font-weight:600; color:var(--brown); margin-bottom:8px;}
+  .phone-field{
+    display:flex; align-items:center; border:1.5px solid #e0dbcf; border-radius:var(--radius-pill);
+    overflow:hidden; transition:border-color 0.2s ease; background:var(--white);
+  }
+  .phone-field:focus-within{border-color:var(--farm-green);}
+  .phone-prefix{background:var(--bg); padding:13px 14px; font-weight:600; color:var(--brown); font-size:0.95rem; border-right:1px solid #e0dbcf;}
+  .phone-field input{flex:1; border:none; outline:none; padding:13px 16px; font-size:1rem; background:transparent; color:var(--text);}
+
+  .field-error{color:var(--error); font-size:0.78rem; margin-top:8px; display:none;}
+  .field-error.show{display:block;}
+
+  .btn-primary{
+    width:100%; background:var(--farm-green); color:var(--white); padding:14px; border-radius:var(--radius-pill);
+    font-weight:700; font-size:0.96rem; margin-top:20px; transition:background 0.2s ease;
+  }
+  .btn-primary:hover{background:var(--farm-green-light);}
+  .btn-primary:disabled{background:#cfcabf; cursor:not-allowed;}
+
+  .btn-secondary{
+    width:100%; background:var(--turmeric); color:var(--brown); padding:14px; border-radius:var(--radius-pill);
+    font-weight:700; font-size:0.96rem; margin-top:20px; transition:filter 0.2s ease;
+  }
+  .btn-secondary:hover{filter:brightness(1.05);}
+
+  .terms-note{font-size:0.76rem; color:var(--text-soft); margin-top:16px; text-align:center; line-height:1.5;}
+
+  /* OTP */
+  .otp-sent-to{font-size:0.88rem; color:var(--text-soft); margin-bottom:18px;}
+  .otp-sent-to strong{color:var(--brown);}
+  .otp-sent-to button{color:var(--farm-green); font-weight:700; font-size:0.85rem; margin-left:4px; text-decoration:underline;}
+  .otp-boxes{display:flex; gap:9px; justify-content:space-between; margin-bottom:6px;}
+  .otp-boxes input{
+    width:44px; height:52px; text-align:center; font-size:1.3rem; font-weight:700; color:var(--brown);
+    border:1.5px solid #e0dbcf; border-radius:var(--radius-md); outline:none; transition:border-color 0.2s ease;
+  }
+  .otp-boxes input:focus{border-color:var(--farm-green);}
+  .otp-boxes.shake{animation:shake 0.4s ease;}
+  @keyframes shake{
+    0%,100%{transform:translateX(0);} 20%{transform:translateX(-8px);} 40%{transform:translateX(8px);}
+    60%{transform:translateX(-6px);} 80%{transform:translateX(6px);}
+  }
+  .otp-hint{font-size:0.76rem; color:var(--text-soft); margin-bottom:4px;}
+  .resend-row{display:flex; justify-content:space-between; align-items:center; margin-top:16px; font-size:0.85rem;}
+  .resend-row button{color:var(--farm-green); font-weight:700;}
+  .resend-row button:disabled{color:var(--text-soft); cursor:not-allowed; font-weight:600;}
+  .change-num{color:var(--brown); font-weight:600; text-decoration:underline; font-size:0.85rem;}
+
+  /* success */
+  .success-wrap{text-align:center; padding:10px 0 4px;}
+  .check-circle{
+    width:74px; height:74px; border-radius:50%; background:var(--farm-green-tint); color:var(--farm-green);
+    display:flex; align-items:center; justify-content:center; margin:0 auto 20px;
+  }
+  .check-circle svg{width:38px; height:38px; stroke-dasharray:40; stroke-dashoffset:40; animation:drawCheck 0.5s ease 0.15s forwards;}
+  @keyframes drawCheck{to{stroke-dashoffset:0;}}
+  .success-wrap h2{margin-bottom:8px;}
+  .success-wrap p{color:var(--text-soft); font-size:0.9rem; margin-bottom:6px;}
+
+  /* toast */
+  .toast{
+    position:fixed; top:20px; right:20px; z-index:400; background:var(--brown); color:var(--white);
+    padding:12px 18px; border-radius:var(--radius-md); font-size:0.85rem; font-weight:600; box-shadow:var(--shadow-md);
+    transform:translateX(120%); transition:transform 0.35s ease; display:flex; align-items:center; gap:8px;
+  }
+  .toast.show{transform:translateX(0);}
+  .toast svg{width:16px; height:16px; flex-shrink:0;}
+
+  @media (prefers-reduced-motion: reduce){ *{animation:none !important; transition:none !important;} }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <a href="{% url 'home' %}" class="brand" style="text-decoration:none;color:inherit;">
+    <svg viewBox="0 0 24 24" fill="none"><path d="M12 2C7 2 3 6 3 11c0 5.5 9 11 9 11s9-5.5 9-11c0-5-4-9-9-9z" fill="#F9A825"/><path d="M12 6c-2.8 0-5 2.2-5 5 0 3.3 5 7 5 7s5-3.7 5-7c0-2.8-2.2-5-5-5z" fill="#2E7D32"/></svg>
+    <span class="brand-name">Farm2Door</span>
+  </a>
+  <a href="#" class="help-link">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 2-3 4"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+    Need help?
+  </a>
+</header>
+
+<div class="auth-wrap">
+  <!-- ===================== ILLUSTRATION PANEL ===================== -->
+  <aside class="illustration-panel">
+    <div class="blob blob1"></div>
+    <div class="blob blob2"></div>
+    <div class="float-icons">
+      <span class="float-icon" style="top:12%; left:74%;">🌾</span>
+      <span class="float-icon" style="top:62%; left:82%;">🍅</span>
+      <span class="float-icon" style="top:78%; left:18%;">🧺</span>
+    </div>
+    <div class="illustration-content">
+      <span class="hindi-line">खेत से घर तक, ईमानदारी से</span>
+      <h1>Fresh produce, straight from the farmer's hands to yours.</h1>
+      <p>Sign in with your mobile number to order from verified farms near you — no middlemen, transparent pricing.</p>
+      <div class="stat-row">
+        <div class="stat-chip"><div class="num">12,000+</div><div class="lbl">Farmers onboarded</div></div>
+        <div class="stat-chip"><div class="num">85</div><div class="lbl">Cities served</div></div>
+        <div class="stat-chip"><div class="num">₹0</div><div class="lbl">Middleman cut</div></div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ===================== FORM PANEL ===================== -->
+  <main class="form-panel">
+    <div class="auth-card">
+
+      <!-- STEP INDICATOR -->
+      <div class="step-indicator" id="stepIndicator">
+        <div class="step-unit active" data-step="1">
+          <div class="step-connector"></div>
+          <div class="step-circle">1</div>
+          <div class="step-label">Mobile number</div>
+        </div>
+        <div class="step-unit" data-step="2">
+          <div class="step-connector"></div>
+          <div class="step-circle">2</div>
+          <div class="step-label">Verify OTP</div>
+        </div>
+        <div class="step-unit" data-step="3">
+          <div class="step-connector"></div>
+          <div class="step-circle">3</div>
+          <div class="step-label">Done</div>
+        </div>
+      </div>
+
+      <!-- STEP 1: MOBILE NUMBER -->
+      <div class="form-step visible" id="step1">
+        <h2>Sign in to Farm2Door</h2>
+        <p class="auth-sub">Enter your mobile number and we'll send you a one-time code.</p>
+        <label for="phoneInput">Mobile number</label>
+        <div class="phone-field">
+          <span class="phone-prefix">+91</span>
+          <input type="tel" id="phoneInput" placeholder="98765 43210" inputmode="numeric" maxlength="10" aria-label="Mobile number">
+        </div>
+        <div class="field-error" id="phoneError">Enter a valid 10-digit mobile number.</div>
+        <button class="btn-primary" id="sendOtpBtn">Send OTP</button>
+        <p class="terms-note">By continuing, you agree to Farm2Door's Terms of Service and Privacy Policy.</p>
+      </div>
+
+      <!-- STEP 2: OTP -->
+      <div class="form-step" id="step2">
+        <h2>Verify your number</h2>
+        <p class="otp-sent-to">Code sent to <strong id="sentToNumber">+91 XXXXXXXXXX</strong><button id="changeNumberBtn" type="button">Change</button></p>
+        <label>Enter 6-digit OTP</label>
+        <div class="otp-boxes" id="otpBoxes">
+          <input type="text" inputmode="numeric" maxlength="1">
+          <input type="text" inputmode="numeric" maxlength="1">
+          <input type="text" inputmode="numeric" maxlength="1">
+          <input type="text" inputmode="numeric" maxlength="1">
+          <input type="text" inputmode="numeric" maxlength="1">
+          <input type="text" inputmode="numeric" maxlength="1">
+        </div>
+        <p class="otp-hint">Demo mode — use <strong>123456</strong> to continue.</p>
+        <div class="field-error" id="otpError">That code didn't match. Please try again.</div>
+        <div class="resend-row">
+          <span id="resendTimerLabel">Resend OTP in <strong id="timerSeconds">60</strong>s</span>
+          <button id="resendBtn" disabled>Resend OTP</button>
+        </div>
+        <button class="btn-primary" id="verifyOtpBtn">Verify &amp; continue</button>
+      </div>
+
+      <!-- STEP 3: SUCCESS -->
+      <div class="form-step" id="step3">
+        <div class="success-wrap">
+          <div class="check-circle">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>
+          </div>
+          <h2>You're in!</h2>
+          <p>Your number <strong id="verifiedNumber"></strong> is verified.</p>
+          <p>Welcome to Farm2Door — fresh produce is just a few taps away.</p>
+          <button class="btn-secondary" id="continueBtn">Continue to Marketplace</button>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ========================= STATE ========================= */
+let currentStep = 1;
+let resendTimerHandle = null;
+let secondsLeft = 60;
+const DEMO_OTP = "123456";
+
+/* ========================= HELPERS ========================= */
+function showToast(msg){
+  const t = document.getElementById("toast");
+  t.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg><span>'+msg+'</span>';
+  t.classList.add("show");
+  clearTimeout(t._timer);
+  t._timer = setTimeout(()=> t.classList.remove("show"), 2200);
+}
+
+function goToStep(n){
+  currentStep = n;
+  document.querySelectorAll(".form-step").forEach(el=> el.classList.remove("visible"));
+  document.getElementById("step"+n).classList.add("visible");
+
+  document.querySelectorAll(".step-unit").forEach(unit=>{
+    const s = +unit.dataset.step;
+    unit.classList.remove("active","done");
+    if(s < n){
+      unit.classList.add("done");
+      unit.querySelector(".step-circle").innerHTML =
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>';
+    } else if(s === n){
+      unit.classList.add("active");
+      unit.querySelector(".step-circle").textContent = s;
+    } else {
+      unit.querySelector(".step-circle").textContent = s;
+    }
+  });
+}
+
+/* ========================= STEP 1: PHONE ========================= */
+const phoneInput = document.getElementById("phoneInput");
+phoneInput.addEventListener("input", ()=>{
+  phoneInput.value = phoneInput.value.replace(/\D/g,"").slice(0,10);
+  document.getElementById("phoneError").classList.remove("show");
+});
+
+document.getElementById("sendOtpBtn").addEventListener("click", ()=>{
+  const val = phoneInput.value.trim();
+  const valid = /^[6-9]\d{9}$/.test(val);
+  if(!valid){
+    document.getElementById("phoneError").classList.add("show");
+    return;
+  }
+  const formatted = val.slice(0,5)+" "+val.slice(5);
+  document.getElementById("sentToNumber").textContent = "+91 "+formatted;
+  document.getElementById("verifiedNumber").textContent = "+91 "+formatted;
+  showToast("OTP sent via SMS");
+  goToStep(2);
+  resetOtpBoxes();
+  startResendTimer();
+  setTimeout(()=> document.querySelector("#otpBoxes input").focus(), 350);
+});
+
+/* ========================= STEP 2: OTP ========================= */
+const otpBoxes = document.getElementById("otpBoxes");
+const otpInputs = [...otpBoxes.querySelectorAll("input")];
+
+otpInputs.forEach((input, idx)=>{
+  input.addEventListener("input", ()=>{
+    input.value = input.value.replace(/\D/g,"").slice(0,1);
+    document.getElementById("otpError").classList.remove("show");
+    if(input.value && idx < otpInputs.length-1){
+      otpInputs[idx+1].focus();
+    }
+  });
+  input.addEventListener("keydown", (e)=>{
+    if(e.key === "Backspace" && !input.value && idx > 0){
+      otpInputs[idx-1].focus();
+    }
+  });
+  input.addEventListener("paste", (e)=>{
+    e.preventDefault();
+    const digits = (e.clipboardData.getData("text").match(/\d/g) || []).slice(0,6);
+    digits.forEach((d,i)=>{ if(otpInputs[i]) otpInputs[i].value = d; });
+    const nextEmpty = otpInputs.findIndex(inp=>!inp.value);
+    (nextEmpty === -1 ? otpInputs[otpInputs.length-1] : otpInputs[nextEmpty]).focus();
+  });
+});
+
+function resetOtpBoxes(){
+  otpInputs.forEach(inp=> inp.value = "");
+}
+
+document.getElementById("verifyOtpBtn").addEventListener("click", ()=>{
+  const entered = otpInputs.map(i=>i.value).join("");
+  if(entered.length < 6){
+    document.getElementById("otpError").textContent = "Please enter all 6 digits.";
+    document.getElementById("otpError").classList.add("show");
+    otpBoxes.classList.add("shake");
+    setTimeout(()=> otpBoxes.classList.remove("shake"), 400);
+    return;
+  }
+  if(entered === DEMO_OTP){
+    clearInterval(resendTimerHandle);
+    goToStep(3);
+  } else {
+    document.getElementById("otpError").textContent = "That code didn't match. Please try again.";
+    document.getElementById("otpError").classList.add("show");
+    otpBoxes.classList.add("shake");
+    setTimeout(()=> otpBoxes.classList.remove("shake"), 400);
+    resetOtpBoxes();
+    otpInputs[0].focus();
+  }
+});
+
+document.getElementById("changeNumberBtn").addEventListener("click", ()=>{
+  clearInterval(resendTimerHandle);
+  goToStep(1);
+});
+
+function startResendTimer(){
+  secondsLeft = 60;
+  const resendBtn = document.getElementById("resendBtn");
+  const label = document.getElementById("resendTimerLabel");
+  const secLabel = document.getElementById("timerSeconds");
+  resendBtn.disabled = true;
+  label.style.display = "inline";
+  secLabel.textContent = secondsLeft;
+  clearInterval(resendTimerHandle);
+  resendTimerHandle = setInterval(()=>{
+    secondsLeft--;
+    secLabel.textContent = secondsLeft;
+    if(secondsLeft <= 0){
+      clearInterval(resendTimerHandle);
+      resendBtn.disabled = false;
+      label.style.display = "none";
+    }
+  }, 1000);
+}
+
+document.getElementById("resendBtn").addEventListener("click", ()=>{
+  if(document.getElementById("resendBtn").disabled) return;
+  resetOtpBoxes();
+  otpInputs[0].focus();
+  showToast("OTP resent via SMS");
+  startResendTimer();
+});
+
+/* ========================= STEP 3 ========================= */
+document.getElementById("continueBtn").addEventListener("click", ()=>{
+  showToast("Redirecting to marketplace…");
+  setTimeout(() => { window.location.href = "{% url 'marketplace' %}"; }, 700);
+});
+
+/* ========================= INIT ========================= */
+document.getElementById("resendTimerLabel").style.display = "inline";
+</script>
+</body>
+</html>

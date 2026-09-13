@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Farm2Door — Notification Centre</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --farm-green: #2E7D32;
+    --farm-green-light: #4C9A51;
+    --turmeric: #F9A825;
+    --produce-orange: #FB8C00;
+    --earthy-brown: #6D4C41;
+    --bg: #FAFAFA;
+    --soil: #3B2A20;
+    --sage: #EEF3EA;
+    --ink: #333333;
+  }
+  *{ box-sizing: border-box; }
+  body{
+    margin:0;
+    min-height: 100vh;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Work Sans", sans-serif;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  h1,h2,h3,.display{ font-family:"Fraunces", serif; color: var(--earthy-brown); margin:0; font-weight:600; }
+  a{ color:inherit; text-decoration:none; }
+  button{ font-family: inherit; }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+  }
+  :focus-visible{ outline: 3px solid var(--produce-orange); outline-offset: 2px; border-radius: 4px; }
+
+  /* ---------- topbar ---------- */
+  .topbar{ background: var(--farm-green); color:#fff; position: sticky; top:0; z-index: 40; }
+  .topbar-inner{
+    max-width: 1080px; margin:0 auto; padding: 14px 26px;
+    display:flex; align-items:center; justify-content: space-between; gap:20px;
+  }
+  .brand{ display:flex; align-items:center; gap:9px; font-family:"Fraunces", serif; font-weight:600; font-size:1.1rem; }
+  .brand-tag{ font-family:"Work Sans", sans-serif; font-size:0.68rem; font-weight:500; color: var(--turmeric); display:block; }
+  .topbar-right{ display:flex; align-items:center; gap:16px; }
+
+  .bell-wrap{ position: relative; }
+  .bell-btn{
+    background: rgba(255,255,255,0.16);
+    border:none; width:40px; height:40px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center; cursor:pointer; position:relative;
+    transition: background 0.15s ease;
+  }
+  .bell-btn:hover{ background: rgba(255,255,255,0.26); }
+  .bell-btn.ringing svg{ animation: ring 0.6s ease; }
+  @keyframes ring{
+    0%,100%{ transform: rotate(0); }
+    20%{ transform: rotate(14deg); }
+    40%{ transform: rotate(-12deg); }
+    60%{ transform: rotate(8deg); }
+    80%{ transform: rotate(-6deg); }
+  }
+  .bell-badge{
+    position:absolute; top:-3px; right:-3px;
+    min-width:18px; height:18px; padding:0 4px;
+    border-radius:10px; background: var(--turmeric); color: var(--soil);
+    font-size:0.66rem; font-weight:800;
+    display:flex; align-items:center; justify-content:center;
+    border: 2px solid var(--farm-green);
+  }
+
+  .user-chip{ display:flex; align-items:center; gap:9px; }
+  .user-chip .avatar{ width:32px; height:32px; border-radius:50%; }
+  .user-chip .uname{ font-size:0.84rem; font-weight:600; }
+
+  /* ---------- demo controls (not part of the component itself) ---------- */
+  .demo-bar{
+    max-width: 1080px; margin: 26px auto 0; padding: 0 26px;
+    display:flex; align-items:center; justify-content: space-between; gap: 14px; flex-wrap: wrap;
+  }
+  .demo-bar p{ font-size:0.85rem; color:#6b6b6b; max-width: 46ch; }
+  .btn{
+    display:inline-flex; align-items:center; gap:8px;
+    padding: 11px 20px; border-radius: 24px; font-size:0.87rem; font-weight:600;
+    border:none; cursor:pointer; transition: background 0.2s ease, transform 0.15s ease;
+  }
+  .btn:hover{ transform: translateY(-1px); }
+  .btn-secondary{ background: var(--turmeric); color: var(--earthy-brown); }
+  .btn-secondary:hover{ background:#FBB84C; }
+
+  /* ---------- page / panel host ---------- */
+  .page{ max-width: 1080px; margin: 0 auto; padding: 18px 26px 70px; display:flex; justify-content:flex-end; }
+
+  .panel{
+    width: 100%;
+    max-width: 400px;
+    background:#fff;
+    border-radius: 18px;
+    border: 1px solid #E9E3D9;
+    box-shadow: 0 18px 40px rgba(59,42,32,0.1);
+    overflow: hidden;
+  }
+  .panel-head{
+    display:flex; align-items:center; justify-content: space-between;
+    padding: 18px 20px 12px;
+  }
+  .panel-head h2{ font-size: 1.05rem; }
+  .mark-read{
+    background:none; border:none; color: var(--farm-green); font-size:0.78rem; font-weight:700; cursor:pointer;
+  }
+  .mark-read:hover{ text-decoration: underline; text-underline-offset:3px; }
+
+  .tabs{ display:flex; gap:6px; padding: 0 20px 14px; flex-wrap: wrap; }
+  .tab-btn{
+    background: var(--sage); border:none; padding:6px 13px; border-radius:16px;
+    font-size:0.76rem; font-weight:600; color: var(--earthy-brown); cursor:pointer;
+  }
+  .tab-btn.active{ background: var(--farm-green); color:#fff; }
+
+  .notif-list{
+    display:flex; flex-direction:column;
+    max-height: 480px; overflow-y:auto;
+    border-top: 1px solid #F2EDE5;
+  }
+
+  .notif{
+    display:grid;
+    grid-template-columns: 40px 1fr;
+    gap: 12px;
+    padding: 14px 20px;
+    border-bottom: 1px solid #F2EDE5;
+    position: relative;
+    cursor: pointer;
+    transition: background 0.15s ease;
+  }
+  .notif:hover{ background: #FBFAF7; }
+  .notif:last-child{ border-bottom:none; }
+  .notif.unread{ background: #FAFCF7; }
+  .notif.unread::before{
+    content:""; position:absolute; left:7px; top:20px;
+    width:6px; height:6px; border-radius:50%; background: var(--produce-orange);
+  }
+
+  .notif-icon{
+    width:40px; height:40px; border-radius:12px;
+    display:flex; align-items:center; justify-content:center;
+    flex-shrink:0;
+  }
+  .notif-icon.order{ background:#E5F1E5; }
+  .notif-icon.payment{ background: #FFF4D6; }
+  .notif-icon.delivery{ background:#FFEEDB; }
+  .notif-icon.alert{ background:#FBE4DF; }
+
+  .notif-body h3{ font-family:"Work Sans", sans-serif; font-weight:600; font-size:0.9rem; color: var(--ink); }
+  .notif-body p{ margin: 3px 0 0; font-size:0.82rem; color:#7a7a7a; }
+  .notif-time{ font-size:0.72rem; color:#a8a8a8; margin-top:6px; display:block; }
+
+  .panel-foot{
+    padding: 12px 20px; text-align:center; border-top: 1px solid #F2EDE5;
+  }
+  .panel-foot a{ font-size:0.82rem; font-weight:700; color: var(--farm-green); }
+  .panel-foot a:hover{ text-decoration: underline; text-underline-offset:3px; }
+
+  /* new-notification pop-in animation */
+  @keyframes popIn{
+    0%{ opacity:0; transform: translateY(-10px) scale(0.98); max-height:0; padding-top:0; padding-bottom:0; }
+    60%{ opacity:1; transform: translateY(0) scale(1.01); }
+    100%{ opacity:1; transform: translateY(0) scale(1); max-height:140px; }
+  }
+  .notif.new-in{
+    animation: popIn 0.5s cubic-bezier(.2,.8,.25,1) both;
+  }
+
+  /* toast (slide-in) */
+  .toast-stack{
+    position: fixed; top: 78px; right: 26px; z-index: 120;
+    display:flex; flex-direction:column; gap:10px;
+    width: min(340px, calc(100vw - 40px));
+  }
+  .toast{
+    background: var(--soil); color:#fff;
+    border-radius: 14px; padding: 13px 16px;
+    display:flex; align-items:center; gap:12px;
+    box-shadow: 0 14px 30px rgba(59,42,32,0.25);
+    animation: slideIn 0.35s cubic-bezier(.2,.8,.25,1) both;
+  }
+  @keyframes slideIn{
+    from{ opacity:0; transform: translateX(24px); }
+    to{ opacity:1; transform: translateX(0); }
+  }
+  .toast.leaving{ animation: slideOut 0.3s ease forwards; }
+  @keyframes slideOut{ to{ opacity:0; transform: translateX(24px); } }
+  .toast-icon{
+    width:34px; height:34px; border-radius:50%; background: rgba(255,255,255,0.14);
+    display:flex; align-items:center; justify-content:center; flex-shrink:0;
+  }
+  .toast div.tbody p{ margin:2px 0 0; font-size:0.78rem; color:#D8CFC4; }
+  .toast div.tbody h4{ margin:0; font-size:0.85rem; font-weight:700; }
+
+  @media (max-width: 520px){
+    .page{ justify-content: center; padding-left: 14px; padding-right:14px; }
+    .panel{ max-width: 100%; }
+    .toast-stack{ right: 14px; left:14px; width:auto; }
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <a href="{% url 'home' %}" class="brand">
+      <svg width="24" height="24" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M13 24C13 24 5 19.5 5 12.5C5 8 8.5 5 13 5C17.5 5 21 8 21 12.5C21 19.5 13 24 13 24Z" fill="#F9A825"/>
+        <path d="M13 5C13 5 15 9 13 14C11 9 13 5 13 5Z" fill="#fff"/>
+      </svg>
+      <span>Farm2Door<span class="brand-tag">From Farm to Family, Fairly.</span></span>
+    </a>
+    <div class="topbar-right">
+      <div class="bell-wrap">
+        <button class="bell-btn" id="bellBtn" aria-label="Notifications">
+          <svg width="18" height="18" viewBox="0 0 17 17" fill="none"><path d="M3.5 12.5C3.5 12.5 3.5 7 3.5 6.5C3.5 4 5.5 2 8.5 2C11.5 2 13.5 4 13.5 6.5V12.5L14.5 14H2.5L3.5 12.5Z" stroke="#fff" stroke-width="1.3"/><path d="M7 14.5C7 15.3 7.7 16 8.5 16C9.3 16 10 15.3 10 14.5" stroke="#fff" stroke-width="1.3"/></svg>
+          <span class="bell-badge" id="bellBadge">4</span>
+        </button>
+      </div>
+      <div class="user-chip">
+        <svg class="avatar" viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="16" fill="#EEF3EA"/><circle cx="16" cy="13" r="5" fill="#6D4C41"/><path d="M4 27C4 21.5 9 19 16 19C23 19 28 21.5 28 27" fill="#6D4C41"/></svg>
+        <span class="uname">Kavita Rao</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="demo-bar">
+  <p>This is the Notification Centre dropdown, shown open. Use the button to simulate a new alert arriving in real time.</p>
+  <button class="btn btn-secondary" id="simulateBtn">
+    <svg width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M7.5 2V13M2 7.5H13" stroke="#6D4C41" stroke-width="1.6"/></svg>
+    Simulate new alert
+  </button>
+</div>
+
+<div class="page">
+  <div class="panel">
+    <div class="panel-head">
+      <h2>Notifications</h2>
+      <button class="mark-read" id="markAllBtn">Mark all read</button>
+    </div>
+    <div class="tabs" id="tabs">
+      <button class="tab-btn active" data-filter="all">All</button>
+      <button class="tab-btn" data-filter="order">Orders</button>
+      <button class="tab-btn" data-filter="payment">Payments</button>
+      <button class="tab-btn" data-filter="delivery">Delivery</button>
+    </div>
+    <div class="notif-list" id="notifList"></div>
+    <div class="panel-foot"><a href="#">View all notifications</a></div>
+  </div>
+</div>
+
+<div class="toast-stack" id="toastStack"></div>
+
+<script>
+  const icons = {
+    order:   { cls:"order",   svg:'<svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="3" y="4.5" width="12" height="10" rx="1.5" stroke="#2E7D32" stroke-width="1.4"/><path d="M3 7.5H15" stroke="#2E7D32" stroke-width="1.4"/></svg>' },
+    payment: { cls:"payment", svg:'<svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="6.5" stroke="#B4860B" stroke-width="1.4"/><path d="M9 5.5V12.5M6.7 10.5C6.7 11.6 7.7 12 9 12C10.3 12 11.3 11.5 11.3 10.5C11.3 8.5 6.7 9.5 6.7 7.5C6.7 6.5 7.7 6 9 6C10.3 6 11.1 6.4 11.2 7.4" stroke="#B4860B" stroke-width="1.3"/></svg>' },
+    delivery:{ cls:"delivery",svg:'<svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M3 6H10V12H3V6Z" stroke="#FB8C00" stroke-width="1.4"/><path d="M10 8.5H12.5L14.5 10.5V12H10V8.5Z" stroke="#FB8C00" stroke-width="1.4"/><circle cx="5.5" cy="13.2" r="1.2" stroke="#FB8C00" stroke-width="1.2"/><circle cx="12.5" cy="13.2" r="1.2" stroke="#FB8C00" stroke-width="1.2"/></svg>' },
+    alert:   { cls:"alert",   svg:'<svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M9 2.5L16 14.5H2L9 2.5Z" stroke="#C24C36" stroke-width="1.4"/><path d="M9 7.5V10.5" stroke="#C24C36" stroke-width="1.4"/><circle cx="9" cy="12.3" r="0.9" fill="#C24C36"/></svg>' }
+  };
+
+  let notifications = [
+    { id:1, type:"order",    title:"New order placed",       body:"Priya Sharma ordered a 6kg mixed produce box (₹640).", time:"4 minutes ago",  unread:true },
+    { id:2, type:"payment",  title:"Payout processed",        body:"₹8,240 settled to Ramesh Patil for this week's mango orders.", time:"22 minutes ago", unread:true },
+    { id:3, type:"delivery", title:"Delivery delayed",        body:"Route Bhopal East is running ~15 min behind schedule.", time:"1 hour ago", unread:true },
+    { id:4, type:"order",    title:"Bulk order confirmed",    body:"Green Leaf Hotels confirmed a 120kg weekly vegetable order.", time:"3 hours ago", unread:true },
+    { id:5, type:"payment",  title:"Refund issued",           body:"₹180 refunded to Meena Iyer for a damaged papaya crate.", time:"5 hours ago", unread:false },
+    { id:6, type:"alert",    title:"Document flagged",        body:"KYC documents for Iqbal Ansari need a second review.", time:"Yesterday", unread:false },
+    { id:7, type:"delivery", title:"Route completed",         body:"Suresh Kumar finished all 8 stops on Bhopal East.", time:"Yesterday", unread:false }
+  ];
+
+  const listEl = document.getElementById('notifList');
+  const badgeEl = document.getElementById('bellBadge');
+  let currentFilter = 'all';
+
+  function timeAgoLabel(){ return "Just now"; }
+
+  function unreadCount(){ return notifications.filter(n => n.unread).length; }
+
+  function updateBadge(){
+    const c = unreadCount();
+    badgeEl.textContent = c;
+    badgeEl.style.display = c > 0 ? 'flex' : 'none';
+  }
+
+  function render(newId){
+    const rows = notifications.filter(n => currentFilter === 'all' ? true : n.type === currentFilter);
+    listEl.innerHTML = rows.map(n => {
+      const ic = icons[n.type];
+      return `<div class="notif ${n.unread ? 'unread' : ''} ${n.id === newId ? 'new-in' : ''}" data-id="${n.id}">
+        <div class="notif-icon ${ic.cls}">${ic.svg}</div>
+        <div class="notif-body">
+          <h3>${n.title}</h3>
+          <p>${n.body}</p>
+          <span class="notif-time">${n.time}</span>
+        </div>
+      </div>`;
+    }).join('') || `<div style="padding:26px 20px; color:#9a9a9a; font-size:0.85rem; text-align:center;">No notifications here.</div>`;
+    updateBadge();
+  }
+
+  document.getElementById('tabs').addEventListener('click', e => {
+    const btn = e.target.closest('.tab-btn');
+    if(!btn) return;
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentFilter = btn.dataset.filter;
+    render();
+  });
+
+  listEl.addEventListener('click', e => {
+    const card = e.target.closest('.notif');
+    if(!card) return;
+    const n = notifications.find(x => x.id == card.dataset.id);
+    if(n && n.unread){ n.unread = false; render(); }
+  });
+
+  document.getElementById('markAllBtn').addEventListener('click', () => {
+    notifications.forEach(n => n.unread = false);
+    render();
+  });
+
+  let nextId = 8;
+  const sampleNew = [
+    { type:"order", title:"New order placed", body:"Devendra Patel ordered bananas and papaya (₹210)." },
+    { type:"payment", title:"Payment received", body:"₹640 received from Priya Sharma via UPI." },
+    { type:"delivery", title:"Delivery started", body:"Suresh Kumar picked up 3 pending crates from the hub." },
+    { type:"alert", title:"Low stock alert", body:"Alphonso mango crates are running low in Devgad." }
+  ];
+
+  document.getElementById('simulateBtn').addEventListener('click', () => {
+    const pick = sampleNew[Math.floor(Math.random() * sampleNew.length)];
+    const n = { id: nextId++, type: pick.type, title: pick.title, body: pick.body, time: timeAgoLabel(), unread: true };
+    notifications.unshift(n);
+
+    // ring the bell
+    const bell = document.getElementById('bellBtn');
+    bell.classList.remove('ringing'); void bell.offsetWidth; bell.classList.add('ringing');
+
+    if(currentFilter === 'all' || currentFilter === n.type){
+      render(n.id);
+    } else {
+      updateBadge();
+    }
+    showToast(n);
+  });
+
+  const toastStack = document.getElementById('toastStack');
+  function showToast(n){
+    const ic = icons[n.type];
+    const el = document.createElement('div');
+    el.className = 'toast';
+    el.innerHTML = `<div class="toast-icon">${ic.svg}</div><div class="tbody"><h4>${n.title}</h4><p>${n.body}</p></div>`;
+    toastStack.appendChild(el);
+    setTimeout(() => {
+      el.classList.add('leaving');
+      setTimeout(() => el.remove(), 320);
+    }, 3600);
+  }
+
+  render();
+</script>
+
+</body>
+</html>
