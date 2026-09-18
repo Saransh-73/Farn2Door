@@ -42,7 +42,11 @@ SECRET_KEY = 'django-insecure-7%2wopp@e_#%0!mo$9_xo45swg0frl%u%h(f$86n^&177u)b=d
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1,testserver').split(',')
+ALLOWED_HOSTS = [
+    'farm2door-4zmx.onrender.com',
+    'localhost',
+    '127.0.0.1',
+]
 
 
 # Application definition
