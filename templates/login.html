@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Farm2Door — Log in</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --farm-green:#2E7D32;
+    --farm-green-light:#4C9A51;
+    --turmeric:#F9A825;
+    --produce-orange:#FB8C00;
+    --earthy-brown:#6D4C41;
+    --bg:#FAFAFA;
+    --ink:#333333;
+    --sage:#EEF3EA;
+    --crate-wood:#C98A4B;
+    --white:#FFFFFF;
+    --shadow: 0 10px 30px rgba(46,32,20,0.12);
+    --radius-lg: 20px;
+    --radius-md: 12px;
+  }
+
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    font-family:'Inter', sans-serif;
+    color:var(--ink);
+    background:var(--bg);
+  }
+  h1,h2,h3,.brand-word{
+    font-family:'Roboto Slab', serif;
+    color:var(--earthy-brown);
+    margin:0;
+  }
+
+  a{color:inherit;}
+
+  /* ---------- Top bar ---------- */
+  .topbar{
+    position:sticky;
+    top:0;
+    z-index:20;
+    background:var(--farm-green);
+    color:var(--white);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:14px 28px;
+  }
+  .topbar .brand{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-size:1.15rem;
+    font-weight:700;
+    color:var(--white);
+    text-decoration:none;
+  }
+  .brand .leaf{
+    width:28px; height:28px;
+    display:inline-block;
+  }
+  .topbar .tagline{
+    font-size:0.8rem;
+    color:#F1D9A8;
+    font-weight:500;
+    letter-spacing:.2px;
+  }
+  .topbar-right{display:flex;align-items:center;gap:18px;font-size:.92rem;}
+  .topbar-right a{text-decoration:none;color:#EAF3E9;}
+  .topbar-right a:hover{color:var(--turmeric);}
+
+  /* ---------- Layout ---------- */
+  .stage{
+    min-height:calc(100vh - 60px);
+    display:grid;
+    grid-template-columns: 1.05fr 1fr;
+  }
+  @media (max-width: 920px){
+    .stage{grid-template-columns:1fr;}
+  }
+
+  /* ---------- Left: the market shelf ---------- */
+  .shelf-side{
+    background:
+      radial-gradient(circle at 15% 20%, rgba(249,168,37,0.16), transparent 45%),
+      radial-gradient(circle at 85% 80%, rgba(46,125,50,0.14), transparent 50%),
+      var(--sage);
+    padding: 56px 48px;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    gap:34px;
+  }
+  .shelf-intro h1{
+    font-size:1.9rem;
+    line-height:1.25;
+  }
+  .shelf-intro p{
+    margin-top:10px;
+    color:#5a5a52;
+    font-size:1rem;
+    max-width:46ch;
+  }
+  .hindi-line{
+    display:inline-block;
+    margin-top:10px;
+    color:var(--produce-orange);
+    font-weight:600;
+    border-bottom:2px solid var(--turmeric);
+    padding-bottom:2px;
+  }
+
+  /* the "shelf" of crates */
+  .crate-shelf{
+    position:relative;
+    padding-top:14px;
+  }
+  .crate-shelf::before{
+    /* wooden shelf ledge */
+    content:"";
+    position:absolute;
+    left:-8px; right:-8px; bottom:-16px;
+    height:14px;
+    background: linear-gradient(180deg, var(--crate-wood), #9c6431);
+    border-radius:6px;
+    box-shadow: 0 10px 18px rgba(109,76,65,0.35);
+  }
+  .crate-grid{
+    display:grid;
+    grid-template-columns:repeat(3, 1fr);
+    gap:16px;
+  }
+  @media (max-width:520px){
+    .crate-grid{grid-template-columns:repeat(2,1fr);}
+  }
+
+  .crate{
+    position:relative;
+    background:var(--white);
+    border:2px solid transparent;
+    border-radius:var(--radius-md);
+    padding:18px 12px 16px;
+    text-align:center;
+    cursor:pointer;
+    transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+    box-shadow: 0 4px 10px rgba(60,45,20,0.08);
+  }
+  .crate:hover{
+    transform:translateY(-4px);
+    box-shadow: var(--shadow);
+  }
+  .crate:focus-visible{
+    outline:3px solid var(--farm-green-light);
+    outline-offset:2px;
+  }
+  .crate .icon{
+    width:40px;height:40px;
+    margin:0 auto 10px;
+    display:block;
+  }
+  .crate .label{
+    font-weight:700;
+    font-size:0.86rem;
+    color:var(--earthy-brown);
+  }
+  .crate .sub{
+    font-size:.72rem;
+    color:#7a7a70;
+    margin-top:2px;
+  }
+
+  .crate[data-role="farmer"]{border-top:4px solid var(--farm-green);}
+  .crate[data-role="consumer"]{border-top:4px solid var(--produce-orange);}
+  .crate[data-role="bulk"]{border-top:4px solid var(--turmeric);}
+  .crate[data-role="delivery"]{border-top:4px solid var(--earthy-brown);}
+  .crate[data-role="admin"]{border-top:4px solid #556B2F;}
+
+  .crate.selected{
+    border-color: var(--farm-green);
+    background: #F3FAF1;
+    box-shadow: var(--shadow);
+  }
+  .crate.selected::after{
+    content:"✓";
+    position:absolute;
+    top:8px; right:10px;
+    width:18px;height:18px;
+    border-radius:50%;
+    background:var(--farm-green);
+    color:var(--white);
+    font-size:.7rem;
+    display:flex;align-items:center;justify-content:center;
+    font-weight:700;
+  }
+
+  /* ---------- Right: form panel ---------- */
+  .form-side{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:48px 32px;
+    background:var(--white);
+  }
+  .form-card{
+    width:100%;
+    max-width:400px;
+  }
+  .form-card .eyebrow-role{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-bottom:22px;
+  }
+  .role-chip{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    background:var(--sage);
+    color:var(--farm-green);
+    font-weight:600;
+    font-size:.82rem;
+    padding:6px 14px;
+    border-radius:999px;
+    transition: background .2s ease, color .2s ease;
+  }
+  .role-chip .dot{
+    width:8px;height:8px;border-radius:50%;
+    background:var(--farm-green);
+  }
+
+  .form-card h2{
+    font-size:1.55rem;
+    margin-bottom:6px;
+  }
+  .form-card .helper{
+    color:#6b6b62;
+    font-size:.92rem;
+    margin-bottom:26px;
+  }
+
+  .field{
+    margin-bottom:18px;
+  }
+  .field label{
+    display:block;
+    font-size:.85rem;
+    font-weight:600;
+    color:var(--earthy-brown);
+    margin-bottom:6px;
+  }
+  .field input, .field select{
+    width:100%;
+    padding:12px 14px;
+    border-radius:10px;
+    border:1.5px solid #DDD8D0;
+    font-size:.95rem;
+    font-family:inherit;
+    color:var(--ink);
+    background:var(--bg);
+    transition: border-color .15s ease, box-shadow .15s ease;
+  }
+  .field input:focus, .field select:focus{
+    outline:none;
+    border-color: var(--farm-green);
+    box-shadow: 0 0 0 3px rgba(46,125,50,0.15);
+    background:var(--white);
+  }
+  .field.error input{
+    border-color:#C62828;
+  }
+  .field .error-msg{
+    display:none;
+    color:#C62828;
+    font-size:.78rem;
+    margin-top:5px;
+  }
+  .field.error .error-msg{display:block;}
+
+  .row-between{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    font-size:.85rem;
+    margin-bottom:22px;
+  }
+  .remember{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    color:#555;
+  }
+  .remember input{width:15px;height:15px;accent-color:var(--farm-green);}
+  .forgot{
+    color:var(--farm-green);
+    text-decoration:none;
+    font-weight:600;
+  }
+  .forgot:hover{text-decoration:underline;}
+
+  .btn-primary{
+    width:100%;
+    padding:13px;
+    background:var(--farm-green);
+    color:var(--white);
+    border:none;
+    border-radius:10px;
+    font-size:1rem;
+    font-weight:700;
+    font-family:inherit;
+    cursor:pointer;
+    transition: background .18s ease, transform .1s ease;
+  }
+  .btn-primary:hover{background:var(--farm-green-light);}
+  .btn-primary:active{transform:scale(0.98);}
+
+  .divider{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    margin:24px 0;
+    color:#9a9a90;
+    font-size:.8rem;
+  }
+  .divider::before, .divider::after{
+    content:"";
+    flex:1;
+    height:1px;
+    background:#E5E1D8;
+  }
+
+  .btn-secondary{
+    width:100%;
+    padding:12px;
+    background:var(--white);
+    border:1.5px solid var(--turmeric);
+    color:var(--earthy-brown);
+    border-radius:10px;
+    font-weight:600;
+    font-size:.92rem;
+    font-family:inherit;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    transition: background .15s ease;
+  }
+  .btn-secondary:hover{background:#FFF6E0;}
+
+  .signup-note{
+    text-align:center;
+    margin-top:22px;
+    font-size:.88rem;
+    color:#6b6b62;
+  }
+  .signup-note a{
+    color:var(--produce-orange);
+    font-weight:700;
+    text-decoration:none;
+  }
+  .signup-note a:hover{text-decoration:underline;}
+
+  /* voice-input mic hint, shown for farmer role only */
+  .mic-hint{
+    display:none;
+    align-items:center;
+    gap:10px;
+    background:#F3FAF1;
+    border:1px dashed var(--farm-green);
+    border-radius:10px;
+    padding:10px 12px;
+    margin-bottom:18px;
+    font-size:.85rem;
+    color:var(--farm-green);
+  }
+  .mic-hint.show{display:flex;}
+  .mic-btn{
+    width:30px;height:30px;
+    border-radius:50%;
+    background:var(--farm-green);
+    display:flex;align-items:center;justify-content:center;
+    flex-shrink:0;
+  }
+  .mic-btn svg{width:15px;height:15px;fill:var(--white);}
+
+  /* animation: gentle fade when role changes */
+  .fade-swap{
+    animation: fadeSwap .28s ease;
+  }
+  @keyframes fadeSwap{
+    from{opacity:0; transform:translateY(6px);}
+    to{opacity:1; transform:translateY(0);}
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation:none !important; transition:none !important;}
+  }
+
+  .visually-hidden{
+    position:absolute;
+    width:1px;height:1px;
+    overflow:hidden;
+    clip:rect(0 0 0 0);
+    white-space:nowrap;
+  }
+</style>
+</head>
+<body>
+  {% include 'includes/back_button.html' %}
+
+<div class="topbar">
+  <a class="brand" href="{% url 'home' %}">
+    <svg class="leaf" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <path d="M4 20C4 12 9 4 20 4C20 15 12 20 4 20Z" fill="#F9A825"/>
+      <path d="M4 20C8 16 12 12 20 4" stroke="#2E7D32" stroke-width="1.5"/>
+    </svg>
+    <span>Farm2Door</span>
+  </a>
+  <div class="topbar-right">
+    <span class="tagline">From Farm to Family, Fairly.</span>
+    <a href="#">Need help?</a>
+  </div>
+</div>
+
+<main class="stage">
+
+  <!-- LEFT: role shelf -->
+  <section class="shelf-side" aria-label="Choose your role">
+    <div class="shelf-intro">
+      <h1>Who's picking up today?</h1>
+      <p>Pick the crate that matches you, then log in below. Everyone gets a dashboard built for what they actually need to do.</p>
+      <span class="hindi-line">खेत से घर तक, सीधा और सही दाम पर</span>
+    </div>
+
+    <div class="crate-shelf">
+      <div class="crate-grid" role="radiogroup" aria-label="Select your role">
+
+        <button type="button" class="crate selected" data-role="farmer" role="radio" aria-checked="true">
+          <svg class="icon" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <circle cx="24" cy="24" r="22" fill="#E8F5E9"/>
+            <path d="M24 12v18M24 12c-4 0-7 3-7 7M24 12c4 0 7 3 7 7" stroke="#2E7D32" stroke-width="2.4" stroke-linecap="round"/>
+            <path d="M14 34h20" stroke="#6D4C41" stroke-width="2.4" stroke-linecap="round"/>
+          </svg>
+          <div class="label">Farmer / FPO</div>
+          <div class="sub">List crops, get orders</div>
+        </button>
+
+        <button type="button" class="crate" data-role="consumer" role="radio" aria-checked="false">
+          <svg class="icon" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <circle cx="24" cy="24" r="22" fill="#FFF3E0"/>
+            <path d="M15 18h18l-2 14a3 3 0 0 1-3 2.6H20a3 3 0 0 1-3-2.6L15 18Z" stroke="#FB8C00" stroke-width="2.2" stroke-linejoin="round"/>
+            <path d="M19 18a5 5 0 0 1 10 0" stroke="#FB8C00" stroke-width="2.2"/>
+          </svg>
+          <div class="label">Consumer</div>
+          <div class="sub">Shop fresh produce</div>
+        </button>
+
+        <button type="button" class="crate" data-role="bulk" role="radio" aria-checked="false">
+          <svg class="icon" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <circle cx="24" cy="24" r="22" fill="#FFF8E1"/>
+            <rect x="13" y="16" width="9" height="9" rx="1.5" stroke="#F9A825" stroke-width="2.2"/>
+            <rect x="26" y="16" width="9" height="9" rx="1.5" stroke="#F9A825" stroke-width="2.2"/>
+            <rect x="19.5" y="27" width="9" height="9" rx="1.5" stroke="#F9A825" stroke-width="2.2"/>
+          </svg>
+          <div class="label">Bulk Buyer</div>
+          <div class="sub">Restaurants &amp; retailers</div>
+        </button>
+
+        <button type="button" class="crate" data-role="delivery" role="radio" aria-checked="false">
+          <svg class="icon" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <circle cx="24" cy="24" r="22" fill="#EFEBE9"/>
+            <rect x="9" y="18" width="16" height="10" rx="1.5" stroke="#6D4C41" stroke-width="2.2"/>
+            <path d="M25 21h6l4 4v3h-10v-7Z" stroke="#6D4C41" stroke-width="2.2" stroke-linejoin="round"/>
+            <circle cx="16" cy="30" r="2.4" stroke="#6D4C41" stroke-width="2"/>
+            <circle cx="31" cy="30" r="2.4" stroke="#6D4C41" stroke-width="2"/>
+          </svg>
+          <div class="label">Delivery Partner</div>
+          <div class="sub">Run routes, earn</div>
+        </button>
+
+        <button type="button" class="crate" data-role="admin" role="radio" aria-checked="false">
+          <svg class="icon" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <circle cx="24" cy="24" r="22" fill="#EEF2E4"/>
+            <path d="M24 11l10 4v8c0 8-5 12.5-10 14.5C19 35.5 14 31 14 23v-8l10-4Z" stroke="#556B2F" stroke-width="2.2" stroke-linejoin="round"/>
+            <path d="M19.5 24l3 3 6.5-6.5" stroke="#556B2F" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <div class="label">Admin</div>
+          <div class="sub">Oversee the platform</div>
+        </button>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- RIGHT: login form -->
+  <section class="form-side">
+    <div class="form-card">
+
+      <div class="eyebrow-role">
+        <span class="role-chip" id="roleChip"><span class="dot"></span><span id="roleChipText">Farmer / FPO</span></span>
+      </div>
+
+      <h2 id="formHeading" class="fade-swap">Welcome back, farmer</h2>
+      <p class="helper" id="formHelper">Log in to manage your listings and orders.</p>
+
+      <div class="mic-hint" id="micHint">
+        <span class="mic-btn">
+          <svg viewBox="0 0 24 24"><path d="M12 15a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3Zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V21h2v-2.08A7 7 0 0 0 19 12h-2Z"/></svg>
+        </span>
+        <span>Prefer speaking? Tap the mic on any screen to log in by voice.</span>
+      </div>
+
+      <form id="loginForm" method="post" action="{% url 'login' %}" novalidate>
+        {% csrf_token %}
+        <input type="hidden" id="roleInput" name="role" value="farmer">
+
+        <div class="field" id="nameField">
+          <label for="name">Full name (optional)</label>
+          <input type="text" id="name" name="name" placeholder="Your full name" autocomplete="name" value="{{ submitted_name|default:'' }}">
+          <div class="error-msg">Enter your full name.</div>
+        </div>
+
+        <div class="field" id="emailField">
+          <label for="email">Email address</label>
+          <input type="email" id="email" name="email" placeholder="you@example.com" autocomplete="email" value="{{ submitted_email|default:'' }}">
+          <div class="error-msg">Enter a valid email address.</div>
+        </div>
+
+        <div class="field" id="phoneField">
+          <label for="phone">Mobile number</label>
+          <input type="tel" id="phone" name="phone" placeholder="98765 43210" autocomplete="tel">
+          <div class="error-msg">Enter a valid 10-digit mobile number.</div>
+        </div>
+
+        <div class="field" id="passField">
+          <label for="password">Password</label>
+          <input type="password" id="password" name="password" placeholder="Enter your password" autocomplete="current-password" required>
+          <div class="error-msg">Password must be at least 6 characters.</div>
+        </div>
+
+        <div class="row-between">
+          <label class="remember"><input type="checkbox"> Remember me</label>
+          <a href="#" class="forgot">Forgot password?</a>
+        </div>
+
+        {% if login_error %}<p class="error-msg" style="display:block;color:#b42318;margin-bottom:12px;">{{ login_error }}</p>{% endif %}
+
+        <button type="submit" class="btn-primary" id="submitBtn">Log in as Farmer / FPO</button>
+      </form>
+
+      <div class="divider">or continue with</div>
+      <button type="button" class="btn-secondary" id="otpBtn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M4 12l6 6L20 6" stroke="#6D4C41" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Log in with OTP instead
+      </button>
+
+      <p class="signup-note">New to Farm2Door? <a href="{% url 'signin' %}">Create an account</a></p>
+    </div>
+  </section>
+
+</main>
+
+<script>
+  const signupLink = document.querySelector('.signup-note a');
+  const roleData = {
+    farmer:   { chip:"Farmer / FPO",   heading:"Welcome back, farmer",     helper:"Log in to manage your listings and orders.",          btn:"Log in as Farmer / FPO",   showMic:true,  dashboard:"{% url 'farmer_dashboard' %}" },
+    consumer: { chip:"Consumer",        heading:"Good to see you again",    helper:"Log in to shop fresh produce from local farms.",       btn:"Log in as Consumer",        showMic:false, dashboard:"{% url 'marketplace' %}" },
+    bulk:     { chip:"Bulk Buyer",      heading:"Welcome back",             helper:"Log in to manage your recurring bulk orders.",         btn:"Log in as Bulk Buyer",      showMic:false, dashboard:"{% url 'bulk_buyer_dashboard' %}" },
+    delivery: { chip:"Delivery Partner",heading:"Ready for your route?",    helper:"Log in to view today's deliveries and earnings.",      btn:"Log in as Delivery Partner",showMic:false, dashboard:"{% url 'delivery_dashboard' %}" },
+    admin:    { chip:"Admin",           heading:"Admin sign-in",            helper:"Log in to access platform oversight and analytics.",  btn:"Log in as Admin",           showMic:false, dashboard:"{% url 'admin_dashboard' %}" },
+  };
+
+  let currentRole = "farmer";
+
+  const crates = document.querySelectorAll('.crate');
+  const roleChipText = document.getElementById('roleChipText');
+  const formHeading = document.getElementById('formHeading');
+  const formHelper = document.getElementById('formHelper');
+  const submitBtn = document.getElementById('submitBtn');
+  const micHint = document.getElementById('micHint');
+
+  function selectRole(role, el){
+    currentRole = role;
+    document.getElementById('roleInput').value = role;
+    if (signupLink) {
+      signupLink.href = `{% url 'signin' %}?role=${role}`;
+    }
+    crates.forEach(c => {
+      c.classList.remove('selected');
+      c.setAttribute('aria-checked','false');
+    });
+    el.classList.add('selected');
+    el.setAttribute('aria-checked','true');
+
+    const data = roleData[role];
+    roleChipText.textContent = data.chip;
+    formHeading.textContent = data.heading;
+    formHelper.textContent = data.helper;
+    submitBtn.textContent = data.btn;
+    micHint.classList.toggle('show', data.showMic);
+
+    [formHeading, formHelper, submitBtn].forEach(node => {
+      node.classList.remove('fade-swap');
+      void node.offsetWidth;
+      node.classList.add('fade-swap');
+    });
+  }
+
+  crates.forEach(crate => {
+    crate.addEventListener('click', () => selectRole(crate.dataset.role, crate));
+    crate.addEventListener('keydown', (e) => {
+      if(e.key === 'Enter' || e.key === ' '){
+        e.preventDefault();
+        selectRole(crate.dataset.role, crate);
+      }
+    });
+  });
+
+  // Preselect role if the link that brought us here specified one (e.g. login.html?role=delivery)
+  const requestedRole = new URLSearchParams(window.location.search).get('role');
+  if (requestedRole && roleData[requestedRole]) {
+    const targetCrate = document.querySelector(`.crate[data-role="${requestedRole}"]`);
+    if (targetCrate) selectRole(requestedRole, targetCrate);
+  }
+
+  // simple client-side validation
+  const form = document.getElementById('loginForm');
+  const nameField = document.getElementById('nameField');
+  const emailField = document.getElementById('emailField');
+  const phoneField = document.getElementById('phoneField');
+  const passField = document.getElementById('passField');
+  const nameInput = document.getElementById('name');
+  const phoneInput = document.getElementById('phone');
+  const emailInput = document.getElementById('email');
+  const passInput = document.getElementById('password');
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    let valid = true;
+
+    const emailVal = emailInput.value.trim();
+    const phoneVal = phoneInput.value.trim();
+    const cleanPhone = phoneVal.replace(/\D/g, '').slice(-10);
+    if(cleanPhone) phoneInput.value = cleanPhone;
+
+    if(!emailVal && !cleanPhone){
+      emailField.classList.add('error');
+      phoneField.classList.add('error');
+      valid = false;
+    } else {
+      if(emailVal){
+        const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailVal);
+        emailField.classList.toggle('error', !emailOk);
+        if(!emailOk) valid = false;
+      } else {
+        emailField.classList.remove('error');
+      }
+
+      if(cleanPhone){
+        const phoneOk = /^\d{10}$/.test(cleanPhone);
+        phoneField.classList.toggle('error', !phoneOk);
+        if(!phoneOk) valid = false;
+      } else {
+        phoneField.classList.remove('error');
+      }
+    }
+
+    const passOk = passInput.value.length >= 4;
+    passField.classList.toggle('error', !passOk);
+    if(!passOk) valid = false;
+
+    if(valid){
+      submitBtn.textContent = "Logging in…";
+      form.submit();
+    }
+  });
+
+  document.getElementById('otpBtn').addEventListener('click', () => {
+    window.location.href = `{% url 'signin' %}?role=${currentRole}`;
+  });
+</script>
+
+</body>
+</html>

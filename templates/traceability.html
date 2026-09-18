@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Farm2Door — Traceability</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,500;0,600;0,700;1,500&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --farm-green:#2E7D32;
+    --farm-green-light:#4CAF50;
+    --farm-green-tint:#DCEDC8;
+    --turmeric:#F9A825;
+    --orange:#FB8C00;
+    --brown:#6D4C41;
+    --bg:#FAFAFA;
+    --text:#333333;
+    --text-soft:#6b6b6b;
+    --white:#FFFFFF;
+    --neutral:#B0AAA0;
+    --shadow-sm: 0 2px 8px rgba(46,30,10,0.06);
+    --shadow-md: 0 8px 24px rgba(46,30,10,0.10);
+    --radius-lg: 18px;
+    --radius-md: 12px;
+    --radius-pill: 999px;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{font-family:'Work Sans', sans-serif; background:var(--bg); color:var(--text); line-height:1.5; -webkit-font-smoothing:antialiased;}
+  h1,h2,h3,h4{font-family:'Fraunces', serif; color:var(--brown); font-weight:700; line-height:1.2;}
+  button{font-family:inherit; cursor:pointer; border:none;}
+  input{font-family:inherit;}
+  a{color:inherit; text-decoration:none;}
+  :focus-visible{outline:3px solid var(--farm-green-light); outline-offset:2px; border-radius:4px;}
+
+  /* ---------- NAV ---------- */
+  .navbar{position:sticky; top:0; z-index:200; background:var(--farm-green); color:var(--white);
+    display:flex; align-items:center; gap:18px; padding:14px 28px; box-shadow:var(--shadow-md); flex-wrap:wrap;}
+  .brand{display:flex; align-items:center; gap:10px; flex-shrink:0;}
+  .brand svg{width:30px; height:30px;}
+  .brand-name{font-family:'Fraunces', serif; font-weight:700; font-size:1.25rem;}
+  .brand-tagline{display:none; font-size:0.7rem; opacity:0.85; margin-top:-2px;}
+  @media (min-width:900px){ .brand-tagline{display:block;} }
+
+  .nav-search{flex:1; max-width:440px; display:flex; align-items:center; background:var(--white);
+    border-radius:var(--radius-pill); padding:9px 14px; gap:8px;}
+  .nav-search input{border:none; outline:none; flex:1; font-size:0.88rem; color:var(--text); background:transparent;}
+  .nav-search svg{width:17px; height:17px; color:var(--text-soft); flex-shrink:0;}
+  .nav-search button{background:var(--brown); color:var(--white); font-size:0.78rem; font-weight:700;
+    padding:6px 12px; border-radius:var(--radius-pill); flex-shrink:0;}
+
+  .scan-btn{margin-left:auto; display:flex; align-items:center; gap:8px; background:var(--turmeric);
+    color:var(--brown); font-weight:700; font-size:0.85rem; padding:9px 16px; border-radius:var(--radius-pill);
+    transition:background 0.2s ease;}
+  .scan-btn:hover{background:#ffb84d;}
+  .scan-btn svg{width:17px; height:17px;}
+
+  /* ---------- PAGE HEAD ---------- */
+  .page-head{max-width:1180px; margin:0 auto; padding:34px 28px 10px; animation:fadeSlideIn 0.6s ease both;}
+  @keyframes fadeSlideIn{from{opacity:0; transform:translateY(12px);} to{opacity:1; transform:translateY(0);}}
+  .page-head h1{font-size:2.05rem; margin-bottom:8px;}
+  .hindi-tagline{display:inline-block; font-size:0.95rem; color:var(--brown); font-weight:600;
+    background:linear-gradient(transparent 62%, rgba(249,168,37,0.45) 62%); padding:0 2px;}
+  .page-head p.sub{color:var(--text-soft); margin-top:10px; max-width:640px; font-size:0.98rem;}
+
+  /* ---------- PRODUCT CHIPS ---------- */
+  .chip-row{max-width:1180px; margin:0 auto; padding:14px 28px 30px; display:flex; gap:10px; flex-wrap:wrap;}
+  .chip{display:flex; align-items:center; gap:8px; padding:9px 16px; border-radius:var(--radius-pill);
+    background:var(--white); border:1px solid #e4e0d8; font-size:0.87rem; font-weight:600; transition:all 0.18s ease;}
+  .chip:hover{border-color:var(--farm-green);}
+  .chip.active{background:var(--farm-green); color:var(--white); border-color:var(--farm-green);}
+  .chip .em{font-size:1.05rem;}
+
+  /* ---------- JOURNEY TIMELINE ---------- */
+  .journey-section{max-width:1180px; margin:0 auto; padding:0 28px 36px;}
+  .journey-section h2{font-size:1.2rem; margin-bottom:18px;}
+  .journey-scroll{overflow-x:auto; padding-bottom:8px;}
+  .journey{position:relative; display:flex; gap:6px; min-width:680px;}
+  .journey::before{content:''; position:absolute; top:23px; left:24px; right:24px; height:2px; background:var(--farm-green-tint); z-index:0;}
+  .journey-step{position:relative; z-index:1; flex:1; display:flex; flex-direction:column; align-items:center; text-align:center; padding:0 4px;}
+  .step-circle{width:46px; height:46px; border-radius:50%; background:var(--farm-green); color:var(--white);
+    display:flex; align-items:center; justify-content:center; box-shadow:var(--shadow-sm); flex-shrink:0;}
+  .step-circle svg{width:20px; height:20px;}
+  .step-title{font-size:0.85rem; font-weight:700; color:var(--brown); margin-top:10px;}
+  .step-loc{font-size:0.74rem; color:var(--text-soft); margin-top:2px; max-width:120px;}
+  .step-date{font-size:0.7rem; color:var(--farm-green); font-weight:600; margin-top:3px;}
+
+  /* ---------- MAIN GRID ---------- */
+  .detail-grid{max-width:1180px; margin:0 auto; padding:0 28px 50px; display:grid;
+    grid-template-columns:1fr 1fr; gap:22px;}
+  @media (max-width:860px){ .detail-grid{grid-template-columns:1fr;} }
+
+  .card{background:var(--white); border-radius:var(--radius-lg); box-shadow:var(--shadow-sm); padding:22px;}
+  .card h3{font-size:1.05rem; margin-bottom:14px; display:flex; align-items:center; gap:8px;}
+  .card h3 svg{width:19px; height:19px; color:var(--farm-green);}
+
+  /* farmer card */
+  .farmer-card{border-top:4px solid var(--farm-green);}
+  .farmer-top{display:flex; gap:14px; align-items:center; margin-bottom:12px;}
+  .farmer-avatar{width:58px; height:58px; border-radius:50%; background:linear-gradient(135deg,#81C784,#2E7D32);
+    display:flex; align-items:center; justify-content:center; font-size:1.6rem; flex-shrink:0;}
+  .farmer-name{font-family:'Fraunces',serif; font-weight:700; color:var(--brown); font-size:1.05rem;}
+  .farmer-meta{font-size:0.8rem; color:var(--text-soft);}
+  .cert-row{display:flex; gap:8px; flex-wrap:wrap; margin:12px 0;}
+  .cert-pill{font-size:0.72rem; font-weight:600; background:var(--bg); border:1px solid #e4e0d8;
+    color:var(--brown); padding:5px 10px; border-radius:var(--radius-pill); display:flex; align-items:center; gap:5px;}
+  .cert-pill svg{width:12px; height:12px; color:var(--farm-green);}
+  .farmer-quote{font-style:italic; color:var(--text-soft); font-size:0.88rem; border-left:3px solid var(--turmeric);
+    padding-left:12px; margin-top:10px;}
+
+  /* batch card */
+  .batch-row{display:flex; justify-content:space-between; padding:9px 0; border-bottom:1px solid #f4f1ea; font-size:0.87rem;}
+  .batch-row:last-child{border-bottom:none;}
+  .batch-row .k{color:var(--text-soft);}
+  .batch-row .v{font-weight:600; color:var(--brown); text-align:right;}
+  .lab-note{margin-top:12px; background:var(--farm-green-tint); color:#2b5c2e; font-size:0.82rem;
+    padding:10px 12px; border-radius:var(--radius-md); display:flex; gap:8px; align-items:flex-start;}
+  .lab-note svg{width:15px; height:15px; flex-shrink:0; margin-top:2px;}
+
+  /* price breakdown card */
+  .farmer-share-badge{display:inline-flex; align-items:center; gap:8px; background:var(--farm-green); color:var(--white);
+    font-weight:700; font-size:0.92rem; padding:10px 16px; border-radius:var(--radius-md); margin-bottom:16px;}
+  .farmer-share-badge svg{width:16px; height:16px;}
+  .stack-bar{display:flex; height:14px; border-radius:var(--radius-pill); overflow:hidden; margin-bottom:16px;}
+  .breakdown-row{display:flex; align-items:center; justify-content:space-between; padding:6px 0; font-size:0.85rem;}
+  .bd-label{display:flex; align-items:center; gap:8px; color:var(--text);}
+  .bd-swatch{width:11px; height:11px; border-radius:3px; flex-shrink:0;}
+  .bd-value{font-weight:700; color:var(--brown);}
+  .price-you-pay{display:flex; justify-content:space-between; align-items:baseline; margin-top:14px;
+    padding-top:14px; border-top:1px dashed #e4e0d8;}
+  .price-you-pay .amt{font-size:1.35rem; font-weight:700; color:var(--farm-green);}
+
+  /* QR card */
+  .qr-card{border:2px solid var(--orange); text-align:center;}
+  .qr-card h3{justify-content:center;}
+  .qr-img-wrap{background:var(--white); display:inline-flex; padding:12px; border-radius:var(--radius-md);
+    box-shadow:var(--shadow-sm); margin:6px 0 14px;}
+  .qr-img-wrap img{width:150px; height:150px; display:block;}
+  .batch-id{font-size:0.82rem; color:var(--text-soft); margin-bottom:14px;}
+  .batch-id strong{color:var(--brown);}
+  .qr-actions{display:flex; gap:10px; justify-content:center; flex-wrap:wrap;}
+  .btn-primary{background:var(--farm-green); color:var(--white); padding:10px 18px; border-radius:var(--radius-md);
+    font-weight:700; font-size:0.85rem; transition:background 0.2s ease;}
+  .btn-primary:hover{background:var(--farm-green-light);}
+  .btn-secondary{background:var(--turmeric); color:var(--brown); padding:10px 18px; border-radius:var(--radius-md);
+    font-weight:700; font-size:0.85rem; transition:filter 0.2s ease;}
+  .btn-secondary:hover{filter:brightness(1.05);}
+
+  /* ---------- SCAN MODAL ---------- */
+  .modal-overlay{display:none; position:fixed; inset:0; background:rgba(30,20,10,0.5); z-index:500;
+    align-items:center; justify-content:center; padding:20px;}
+  .modal-overlay.open{display:flex;}
+  .scan-box{background:var(--white); border-radius:var(--radius-lg); padding:30px; max-width:320px; width:100%;
+    text-align:center; box-shadow:var(--shadow-md); animation:fadeSlideIn 0.25s ease both;}
+  .scan-frame{width:150px; height:150px; margin:0 auto 18px; border:3px solid var(--orange); border-radius:var(--radius-md);
+    position:relative; overflow:hidden; background:var(--bg); display:flex; align-items:center; justify-content:center;}
+  .scan-frame svg{width:60px; height:60px; color:#d8d2c6;}
+  .scan-line{position:absolute; left:6px; right:6px; height:2px; background:var(--orange); top:0;
+    animation:scanMove 1.4s ease-in-out infinite;}
+  @keyframes scanMove{0%{top:8px;} 50%{top:135px;} 100%{top:8px;}}
+  .scan-status{font-size:0.9rem; color:var(--text-soft); margin-bottom:14px;}
+  .scan-cancel{font-size:0.82rem; color:var(--brown); font-weight:600; text-decoration:underline;}
+
+  /* ---------- TOAST ---------- */
+  .toast{position:fixed; top:20px; right:20px; z-index:600; background:var(--brown); color:var(--white);
+    padding:12px 18px; border-radius:var(--radius-md); font-size:0.85rem; font-weight:600; box-shadow:var(--shadow-md);
+    transform:translateX(120%); transition:transform 0.35s ease; display:flex; align-items:center; gap:8px;}
+  .toast.show{transform:translateX(0);}
+  .toast svg{width:16px; height:16px; flex-shrink:0;}
+
+  footer{background:var(--brown); color:#f0e9de; padding:26px 28px; margin-top:10px;}
+  .footer-inner{max-width:1180px; margin:0 auto; display:flex; justify-content:space-between; flex-wrap:wrap;
+    gap:12px; align-items:center;}
+  .footer-inner a{font-size:0.82rem; opacity:0.85;}
+  .footer-inner a:hover{opacity:1; text-decoration:underline;}
+  .footer-links{display:flex; gap:18px; flex-wrap:wrap;}
+
+  @media (prefers-reduced-motion: reduce){ *{animation:none !important; transition:none !important;} }
+</style>
+</head>
+<body>
+  {% include 'includes/back_button.html' %}
+
+<!-- ===================== NAVBAR ===================== -->
+<header class="navbar">
+  <a class="brand" href="{% url 'home' %}" style="text-decoration:none;color:inherit;">
+    <svg viewBox="0 0 24 24" fill="none"><path d="M12 2C7 2 3 6 3 11c0 5.5 9 11 9 11s9-5.5 9-11c0-5-4-9-9-9z" fill="#F9A825"/><path d="M12 6c-2.8 0-5 2.2-5 5 0 3.3 5 7 5 7s5-3.7 5-7c0-2.8-2.2-5-5-5z" fill="#2E7D32"/></svg>
+    <div>
+      <div class="brand-name">Farm2Door</div>
+      <div class="brand-tagline">From Farm to Family, Fairly.</div>
+    </div>
+  </a>
+  <div class="nav-search">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input id="batchInput" type="text" placeholder="Enter batch ID, e.g. F2D-TOM-2609-114" aria-label="Enter batch ID">
+    <button id="traceBtn">Trace</button>
+  </div>
+  <button class="scan-btn" id="scanOpenBtn">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><rect x="8" y="8" width="8" height="8" rx="1"/></svg>
+    Scan QR
+  </button>
+</header>
+
+<!-- ===================== PAGE HEAD ===================== -->
+<div class="page-head">
+  <h1>Farm to Table Journey</h1>
+  <span class="hindi-tagline">खेत से थाली तक, पूरी पारदर्शिता</span>
+  <p class="sub">Every crate that leaves a Farm2Door partner farm carries a batch ID. Scan it or search below to see exactly where your food came from, who grew it, and where every rupee went.</p>
+</div>
+
+<!-- ===================== PRODUCT CHIPS ===================== -->
+<div class="chip-row" id="productChips"></div>
+
+<!-- ===================== JOURNEY ===================== -->
+<section class="journey-section">
+  <h2 id="journeyHeading">Journey so far</h2>
+  <div class="journey-scroll">
+    <div class="journey" id="journeyTrack"></div>
+  </div>
+</section>
+
+<!-- ===================== DETAIL GRID ===================== -->
+<div class="detail-grid">
+  <!-- FARMER CARD -->
+  <div class="card farmer-card">
+    <h3>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Meet your farmer
+    </h3>
+    <div class="farmer-top">
+      <div class="farmer-avatar" id="farmerAvatar">👨‍🌾</div>
+      <div>
+        <div class="farmer-name" id="farmerName"></div>
+        <div class="farmer-meta" id="farmerMeta"></div>
+      </div>
+    </div>
+    <div class="cert-row" id="farmerCerts"></div>
+    <p class="farmer-quote" id="farmerQuote"></p>
+  </div>
+
+  <!-- PRICE BREAKDOWN CARD -->
+  <div class="card">
+    <h3>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+      Where your money goes
+    </h3>
+    <div class="farmer-share-badge" id="farmerShareBadge"></div>
+    <div class="stack-bar" id="stackBar"></div>
+    <div id="breakdownList"></div>
+    <div class="price-you-pay">
+      <span>You pay</span>
+      <span class="amt" id="youPayAmt"></span>
+    </div>
+  </div>
+
+  <!-- BATCH / QUALITY CARD -->
+  <div class="card">
+    <h3>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      Batch &amp; quality record
+    </h3>
+    <div id="batchRows"></div>
+    <div class="lab-note" id="labNote">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4.5 8-11V5l-8-3-8 3v6c0 6.5 8 11 8 11z"/></svg>
+      <span id="labNoteText"></span>
+    </div>
+  </div>
+
+  <!-- QR CARD -->
+  <div class="card qr-card">
+    <h3>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      Scan to verify
+    </h3>
+    <div class="qr-img-wrap">
+      <img id="qrImg" src="" alt="QR code linking to this batch's traceability record">
+    </div>
+    <div class="batch-id">Batch ID: <strong id="batchIdLabel"></strong></div>
+    <div class="qr-actions">
+      <button class="btn-primary" id="downloadCertBtn">Download certificate</button>
+      <button class="btn-secondary" id="shareBtn">Share</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== SCAN MODAL ===================== -->
+<div class="modal-overlay" id="scanOverlay">
+  <div class="scan-box">
+    <div class="scan-frame">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      <div class="scan-line"></div>
+    </div>
+    <div class="scan-status" id="scanStatusText">Point your camera at the crate QR code…</div>
+    <button class="scan-cancel" id="scanCancelBtn">Cancel</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<footer>
+  <div class="footer-inner">
+    <span>© 2026 Farm2Door · From Farm to Family, Fairly.</span>
+    <div class="footer-links">
+      <a href="{% url 'marketplace' %}">Marketplace</a>
+      <a href="{% url 'traceability' %}">Track order</a>
+      <a href="#">Help centre</a>
+      <a href="{% url 'login' %}?role=farmer">Become a seller</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+/* ========================= DATA ========================= */
+const PRODUCTS = [
+  {
+    id:"tomato", name:"Tomato", hindi:"टमाटर", icon:"🍅", price:28, unit:"kg",
+    farmer:{name:"Ramesh Patil", village:"Nashik, Maharashtra", years:14,
+      certs:["FSSAI Registered","Pesticide-Free Certified"],
+      quote:"Every crate I send out carries my family's name on it — that's why quality never slips."},
+    batch:{no:"F2D-TOM-2609-114", harvest:"8 Sep 2026", grade:"Grade A", origin:"Nashik, Maharashtra"},
+    labNote:"Pesticide residue: within FSSAI safe limits · Tested 8 Sep 2026",
+    breakdown:[
+      {label:"Farmer share", pct:68, color:"#2E7D32"},
+      {label:"Transport & logistics", pct:12, color:"#FB8C00"},
+      {label:"Packaging", pct:6, color:"#6D4C41"},
+      {label:"Quality assurance", pct:5, color:"#F9A825"},
+      {label:"Platform fee (FPO)", pct:5, color:"#81C784"},
+      {label:"Retail margin", pct:4, color:"#B0AAA0"},
+    ],
+    journey:[
+      {title:"Harvested", loc:"Ramesh's farm, Nashik", date:"8 Sep, 6:10 AM", icon:"leaf"},
+      {title:"Quality checked", loc:"Nashik FPO centre", date:"8 Sep, 11:40 AM", icon:"check"},
+      {title:"Packed", loc:"Nashik packaging unit", date:"8 Sep, 2:20 PM", icon:"box"},
+      {title:"In transit", loc:"Nashik–Bhopal highway", date:"9 Sep, 5:00 AM", icon:"truck"},
+      {title:"Delivery hub", loc:"Bhopal distribution hub", date:"9 Sep, 6:45 PM", icon:"warehouse"},
+      {title:"Delivered", loc:"Your doorstep, Bhopal", date:"10 Sep, 9:15 AM", icon:"home"},
+    ]
+  },
+  {
+    id:"rice", name:"Basmati Rice", hindi:"बासमती चावल", icon:"🌾", price:95, unit:"kg",
+    farmer:{name:"Harpreet Singh", village:"Amritsar, Punjab", years:22,
+      certs:["FSSAI Registered","GI Tagged Basmati"],
+      quote:"Basmati takes patience — six months in the field for one good harvest."},
+    batch:{no:"F2D-RIC-2609-087", harvest:"2 Sep 2026", grade:"Grade A · Extra Long Grain", origin:"Amritsar, Punjab"},
+    labNote:"Moisture &amp; purity check passed · Tested 4 Sep 2026",
+    breakdown:[
+      {label:"Farmer share", pct:60, color:"#2E7D32"},
+      {label:"Milling & processing", pct:10, color:"#6D4C41"},
+      {label:"Transport & logistics", pct:10, color:"#FB8C00"},
+      {label:"Packaging", pct:5, color:"#81C784"},
+      {label:"Quality assurance", pct:6, color:"#F9A825"},
+      {label:"Platform fee (FPO)", pct:4, color:"#c9a35a"},
+      {label:"Retail margin", pct:5, color:"#B0AAA0"},
+    ],
+    journey:[
+      {title:"Harvested", loc:"Harpreet's farm, Amritsar", date:"2 Sep 2026", icon:"leaf"},
+      {title:"Milled & checked", loc:"Amritsar rice mill", date:"3 Sep 2026", icon:"check"},
+      {title:"Packed", loc:"Amritsar packaging unit", date:"4 Sep 2026", icon:"box"},
+      {title:"In transit", loc:"Delhi rail hub", date:"5 Sep 2026", icon:"truck"},
+      {title:"Delivery hub", loc:"Bhopal distribution hub", date:"6 Sep 2026", icon:"warehouse"},
+      {title:"Delivered", loc:"Your doorstep, Bhopal", date:"7 Sep 2026", icon:"home"},
+    ]
+  },
+  {
+    id:"turmeric", name:"Turmeric", hindi:"हल्दी", icon:"🫚", price:180, unit:"kg",
+    farmer:{name:"Basavaraj Patil", village:"Sangli, Maharashtra", years:18,
+      certs:["Organic Certified","FSSAI Registered"],
+      quote:"Good turmeric is about the drying, not just the digging — we sun-dry ours for 10 days."},
+    batch:{no:"F2D-TUR-2609-052", harvest:"29 Aug 2026", grade:"Organic · High Curcumin", origin:"Sangli, Maharashtra"},
+    labNote:"Curcumin content &amp; purity verified · Tested 5 Sep 2026",
+    breakdown:[
+      {label:"Farmer share", pct:65, color:"#2E7D32"},
+      {label:"Drying & processing", pct:8, color:"#6D4C41"},
+      {label:"Transport & logistics", pct:10, color:"#FB8C00"},
+      {label:"Packaging", pct:5, color:"#81C784"},
+      {label:"Quality assurance", pct:6, color:"#F9A825"},
+      {label:"Platform fee (FPO)", pct:3, color:"#c9a35a"},
+      {label:"Retail margin", pct:3, color:"#B0AAA0"},
+    ],
+    journey:[
+      {title:"Harvested", loc:"Basavaraj's farm, Sangli", date:"29 Aug 2026", icon:"leaf"},
+      {title:"Sun-dried", loc:"Sangli drying yard", date:"1–8 Sep 2026", icon:"check"},
+      {title:"Packed", loc:"Sangli packaging unit", date:"9 Sep 2026", icon:"box"},
+      {title:"In transit", loc:"Sangli–Bhopal freight route", date:"10 Sep 2026", icon:"truck"},
+      {title:"Delivery hub", loc:"Bhopal distribution hub", date:"11 Sep 2026", icon:"warehouse"},
+      {title:"Delivered", loc:"Your doorstep, Bhopal", date:"12 Sep 2026", icon:"home"},
+    ]
+  },
+  {
+    id:"mango", name:"Alphonso Mango", hindi:"आम", icon:"🥭", price:350, unit:"dozen",
+    farmer:{name:"Anil Kadam", village:"Ratnagiri, Maharashtra", years:26,
+      certs:["GI Tagged Alphonso","FSSAI Registered"],
+      quote:"Alphonso doesn't wait for anyone — we pick at dawn so the sweetness doesn't drop."},
+    batch:{no:"F2D-MNG-2609-029", harvest:"7 Sep 2026", grade:"Export Grade · Ratnagiri Alphonso", origin:"Ratnagiri, Maharashtra"},
+    labNote:"Ripeness &amp; sugar content graded fresh at source · 7 Sep 2026",
+    breakdown:[
+      {label:"Farmer share", pct:55, color:"#2E7D32"},
+      {label:"Cold-chain logistics", pct:18, color:"#FB8C00"},
+      {label:"Packaging", pct:6, color:"#6D4C41"},
+      {label:"Quality assurance", pct:5, color:"#F9A825"},
+      {label:"Platform fee (FPO)", pct:5, color:"#81C784"},
+      {label:"Retail margin", pct:11, color:"#B0AAA0"},
+    ],
+    journey:[
+      {title:"Harvested", loc:"Anil's orchard, Ratnagiri", date:"7 Sep, 5:30 AM", icon:"leaf"},
+      {title:"Ripeness graded", loc:"Ratnagiri sorting centre", date:"7 Sep, 10:00 AM", icon:"check"},
+      {title:"Packed", loc:"Ventilated crates, Ratnagiri", date:"7 Sep, 1:00 PM", icon:"box"},
+      {title:"Cold-chain transit", loc:"Ratnagiri–Bhopal cold route", date:"8 Sep, 4:00 AM", icon:"truck"},
+      {title:"Delivery hub", loc:"Bhopal distribution hub", date:"8 Sep, 8:30 PM", icon:"warehouse"},
+      {title:"Delivered", loc:"Your doorstep, Bhopal", date:"9 Sep, 8:00 AM", icon:"home"},
+    ]
+  },
+];
+
+const ICONS = {
+  leaf:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 20A7 7 0 0 1 4 13c0-6 7-11 15-11 0 8-5 15-11 15a7 7 0 0 1-4-1"/></svg>',
+  check:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>',
+  box:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 8l-9-5-9 5 9 5 9-5z"/><path d="M3 8v8l9 5 9-5V8"/><path d="M12 13v8"/></svg>',
+  truck:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="6" width="14" height="11"/><path d="M15 9h4l3 3v5h-7z"/><circle cx="6" cy="19" r="1.6"/><circle cx="17.5" cy="19" r="1.6"/></svg>',
+  warehouse:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-6 9 6"/><path d="M4 9v11h16V9"/><path d="M9 20v-6h6v6"/></svg>',
+  home:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 10.5L12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg>',
+};
+
+let currentId = "tomato";
+
+/* ========================= HELPERS ========================= */
+function fmt(n){ return "₹" + Math.round(n).toLocaleString("en-IN"); }
+
+function showToast(msg){
+  const t = document.getElementById("toast");
+  t.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg><span>'+msg+'</span>';
+  t.classList.add("show");
+  clearTimeout(t._timer);
+  t._timer = setTimeout(()=> t.classList.remove("show"), 2200);
+}
+
+/* ========================= RENDER: CHIPS ========================= */
+function renderChips(){
+  const wrap = document.getElementById("productChips");
+  wrap.innerHTML = PRODUCTS.map(p=>
+    `<button class="chip ${p.id===currentId?'active':''}" data-id="${p.id}"><span class="em">${p.icon}</span>${p.name}</button>`
+  ).join("");
+  wrap.querySelectorAll(".chip").forEach(btn=>{
+    btn.addEventListener("click", ()=> loadProduct(btn.dataset.id, true));
+  });
+}
+
+/* ========================= RENDER: JOURNEY ========================= */
+function renderJourney(p){
+  document.getElementById("journeyHeading").textContent = `Journey of your ${p.name.toLowerCase()}`;
+  const track = document.getElementById("journeyTrack");
+  track.innerHTML = p.journey.map(step=>`
+    <div class="journey-step">
+      <div class="step-circle">${ICONS[step.icon]}</div>
+      <div class="step-title">${step.title}</div>
+      <div class="step-loc">${step.loc}</div>
+      <div class="step-date">${step.date}</div>
+    </div>
+  `).join("");
+}
+
+/* ========================= RENDER: FARMER CARD ========================= */
+function renderFarmer(p){
+  document.getElementById("farmerName").textContent = p.farmer.name;
+  document.getElementById("farmerMeta").textContent = `${p.farmer.village} · ${p.farmer.years} years farming`;
+  document.getElementById("farmerQuote").textContent = `“${p.farmer.quote}”`;
+  document.getElementById("farmerCerts").innerHTML = p.farmer.certs.map(c=>
+    `<span class="cert-pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>${c}</span>`
+  ).join("");
+}
+
+/* ========================= RENDER: BATCH CARD ========================= */
+function renderBatch(p){
+  const rows = [
+    ["Batch number", p.batch.no],
+    ["Harvest date", p.batch.harvest],
+    ["Quality grade", p.batch.grade],
+    ["Origin", p.batch.origin],
+  ];
+  document.getElementById("batchRows").innerHTML = rows.map(([k,v])=>
+    `<div class="batch-row"><span class="k">${k}</span><span class="v">${v}</span></div>`
+  ).join("");
+  document.getElementById("labNoteText").innerHTML = p.labNote;
+}
+
+/* ========================= RENDER: PRICE BREAKDOWN ========================= */
+function renderBreakdown(p){
+  const farmerPct = p.breakdown.find(b=>b.label==="Farmer share").pct;
+  document.getElementById("farmerShareBadge").innerHTML =
+    `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>${farmerPct}% of what you pay goes straight to ${p.farmer.name.split(' ')[0]}`;
+
+  document.getElementById("stackBar").innerHTML = p.breakdown.map(b=>
+    `<div style="width:${b.pct}%; background:${b.color};" title="${b.label}: ${b.pct}%"></div>`
+  ).join("");
+
+  document.getElementById("breakdownList").innerHTML = p.breakdown.map(b=>{
+    const value = (p.price * b.pct / 100);
+    return `<div class="breakdown-row">
+      <span class="bd-label"><span class="bd-swatch" style="background:${b.color};"></span>${b.label} (${b.pct}%)</span>
+      <span class="bd-value">${fmt(value)}</span>
+    </div>`;
+  }).join("");
+
+  document.getElementById("youPayAmt").textContent = `${fmt(p.price)} / ${p.unit}`;
+}
+
+/* ========================= RENDER: QR ========================= */
+function renderQR(p){
+  const data = encodeURIComponent(`https://farm2door.example/trace/${p.batch.no}`);
+  document.getElementById("qrImg").src = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&color=45-77-45&data=${data}`;
+  document.getElementById("batchIdLabel").textContent = p.batch.no;
+}
+
+/* ========================= LOAD PRODUCT ========================= */
+function loadProduct(id, notify){
+  const p = PRODUCTS.find(x=>x.id===id);
+  if(!p) return;
+  currentId = id;
+  renderChips();
+  renderJourney(p);
+  renderFarmer(p);
+  renderBatch(p);
+  renderBreakdown(p);
+  renderQR(p);
+  if(notify) showToast(`Showing traceability for ${p.name}`);
+}
+
+/* ========================= NAV SEARCH ========================= */
+function handleBatchSearch(){
+  const val = document.getElementById("batchInput").value.trim().toUpperCase();
+  if(!val){ showToast("Enter a batch ID to trace"); return; }
+  const match = PRODUCTS.find(p=> p.batch.no.toUpperCase() === val || p.name.toUpperCase() === val);
+  if(match){
+    loadProduct(match.id, true);
+  } else {
+    showToast("Batch not found — try one of the sample products below");
+  }
+}
+document.getElementById("traceBtn").addEventListener("click", handleBatchSearch);
+document.getElementById("batchInput").addEventListener("keydown", (e)=>{ if(e.key==="Enter") handleBatchSearch(); });
+
+/* ========================= QR ACTIONS ========================= */
+document.getElementById("downloadCertBtn").addEventListener("click", ()=> showToast("Certificate download started"));
+document.getElementById("shareBtn").addEventListener("click", ()=> showToast("Trace link copied to clipboard"));
+
+/* ========================= SCAN MODAL ========================= */
+const scanOverlay = document.getElementById("scanOverlay");
+document.getElementById("scanOpenBtn").addEventListener("click", ()=>{
+  scanOverlay.classList.add("open");
+  document.getElementById("scanStatusText").textContent = "Point your camera at the crate QR code…";
+  clearTimeout(window._scanTimer);
+  window._scanTimer = setTimeout(()=>{
+    const random = PRODUCTS[Math.floor(Math.random()*PRODUCTS.length)];
+    document.getElementById("scanStatusText").textContent = `Found batch ${random.batch.no} — ${random.name}`;
+    setTimeout(()=>{
+      scanOverlay.classList.remove("open");
+      loadProduct(random.id, true);
+    }, 700);
+  }, 1800);
+});
+document.getElementById("scanCancelBtn").addEventListener("click", ()=>{
+  clearTimeout(window._scanTimer);
+  scanOverlay.classList.remove("open");
+});
+scanOverlay.addEventListener("click", (e)=>{ if(e.target.id==="scanOverlay"){ clearTimeout(window._scanTimer); scanOverlay.classList.remove("open"); } });
+
+/* ========================= INIT ========================= */
+const requestedQr = new URLSearchParams(window.location.search).get('qr');
+if (requestedQr) {
+  const val = requestedQr.trim().toUpperCase();
+  const match = PRODUCTS.find(p => p.batch.no.toUpperCase() === val);
+  document.getElementById("batchInput").value = requestedQr;
+  if (match) {
+    loadProduct(match.id, false);
+  } else {
+    // Order/crate IDs from checkout or delivery won't match our 4 sample batches —
+    // show a real sample trace so the link still demonstrates the feature end-to-end.
+    loadProduct(currentId, false);
+    showToast(`No exact record for ${requestedQr} yet — showing a sample trace`);
+  }
+} else {
+  loadProduct(currentId, false);
+}
+</script>
+</body>
+</html>

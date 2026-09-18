@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Farm2Door — Account Profile</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Karla:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --farm-green:#2E7D32;
+      --farm-green-tint:#E7ECE4;
+      --mustard:#C99B44;
+      --terracotta:#BC7B4C;
+      --brown:#5E4635;
+      --soil:#3A2C22;
+      --cream:#F6F2EA;
+      --paper:#FFFDF9;
+      --ink:#362C22;
+      --ink-soft:#75695C;
+      --line:#E6DFD2;
+      --radius-lg:22px;
+      --radius-md:14px;
+    }
+    *{box-sizing:border-box;}
+    body{
+      margin:0;
+      background:var(--cream);
+      color:var(--ink);
+      font-family:"Karla", sans-serif;
+      line-height:1.6;
+      -webkit-font-smoothing:antialiased;
+    }
+    header{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      padding:16px 28px;
+      background:var(--paper);
+      border-bottom:1px solid var(--line);
+    }
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      font-family:"Fraunces", serif;
+      font-weight:600;
+      font-size:1.18rem;
+      color:var(--soil);
+      text-decoration:none;
+    }
+    .brand-mark{
+      width:32px; height:32px;
+      border-radius:9px;
+      background:var(--mustard);
+      display:flex; align-items:center; justify-content:center;
+    }
+    .nav-actions{
+      display:flex;
+      align-items:center;
+      gap:14px;
+    }
+    .nav-actions a{
+      font-size:0.88rem;
+      font-weight:600;
+      color:var(--soil);
+      text-decoration:none;
+    }
+    .nav-actions a.logout{
+      color:var(--terracotta);
+    }
+    main{
+      max-width:760px;
+      margin:48px auto;
+      padding:0 24px 60px;
+    }
+    .eyebrow{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      color:var(--farm-green);
+      font-weight:800;
+      font-size:0.78rem;
+      letter-spacing:0.08em;
+      text-transform:uppercase;
+      margin-bottom:8px;
+    }
+    h1{
+      font-family:"Fraunces", serif;
+      font-size:clamp(1.8rem, 4vw, 2.5rem);
+      color:var(--brown);
+      margin:0 0 24px;
+    }
+    .profile-card{
+      background:var(--paper);
+      border:1px solid var(--line);
+      border-radius:var(--radius-lg);
+      padding:34px;
+      box-shadow:0 14px 34px rgba(58,44,34,0.08);
+    }
+    .profile-header{
+      display:flex;
+      align-items:center;
+      gap:18px;
+      padding-bottom:24px;
+      border-bottom:1px solid var(--line);
+      margin-bottom:24px;
+    }
+    .avatar{
+      width:56px; height:56px;
+      border-radius:50%;
+      background:var(--mustard);
+      color:var(--soil);
+      display:flex; align-items:center; justify-content:center;
+      font-family:"Fraunces", serif;
+      font-size:1.4rem;
+      font-weight:700;
+      flex-shrink:0;
+    }
+    .profile-header-info strong{
+      display:block;
+      font-family:"Fraunces", serif;
+      font-size:1.25rem;
+      color:var(--soil);
+    }
+    .profile-header-info span{
+      font-size:0.85rem;
+      color:var(--ink-soft);
+    }
+    .role-badge{
+      display:inline-block;
+      background:var(--farm-green-tint);
+      color:var(--farm-green);
+      font-size:0.75rem;
+      font-weight:700;
+      padding:3px 10px;
+      border-radius:999px;
+      margin-top:4px;
+    }
+    dl{
+      margin:0;
+      display:grid;
+      grid-template-columns:160px 1fr;
+      gap:16px;
+    }
+    dt{
+      font-size:0.8rem;
+      font-weight:700;
+      color:var(--ink-soft);
+      text-transform:uppercase;
+      letter-spacing:0.04em;
+      padding:6px 0;
+    }
+    dd{
+      margin:0;
+      font-size:0.96rem;
+      color:var(--ink);
+      padding:6px 0;
+      word-break:break-word;
+    }
+    .id{
+      font-family:monospace;
+      font-weight:700;
+      color:var(--farm-green);
+      letter-spacing:0.04em;
+    }
+    .actions{
+      display:flex;
+      gap:12px;
+      margin-top:32px;
+      flex-wrap:wrap;
+      padding-top:24px;
+      border-top:1px solid var(--line);
+    }
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:11px 22px;
+      border-radius:999px;
+      font-size:0.9rem;
+      font-weight:700;
+      text-decoration:none;
+      transition:transform .15s ease, background .15s ease;
+      cursor:pointer;
+      border:none;
+    }
+    .btn:hover{ transform:translateY(-1px); }
+    .btn-primary{ background:var(--mustard); color:var(--soil); }
+    .btn-primary:hover{ background:#D7AB58; }
+    .btn-secondary{ background:transparent; border:1.5px solid var(--line); color:var(--soil); }
+    .btn-secondary:hover{ background:var(--farm-green-tint); border-color:var(--farm-green); }
+    @media(max-width:560px){
+      dl{grid-template-columns:1fr; gap:4px;}
+      .profile-card{padding:22px;}
+    }
+  </style>
+</head>
+<body>
+  {% include 'includes/back_button.html' %}
+  <header>
+    <a class="brand" href="{% url 'home' %}">
+      <span class="brand-mark">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 21C12 21 4.5 16.2 4.5 9.8C4.5 6 7.4 3 11 3C12.6 3 13.5 4 12 6.5C10.5 4 11.4 3 13 3C16.6 3 19.5 6 19.5 9.8C19.5 16.2 12 21 12 21Z" fill="#3A2C22"/></svg>
+      </span>
+      Farm2Door
+    </a>
+    <div class="nav-actions">
+      <a href="{% url 'marketplace' %}">Marketplace</a>
+      <a href="{% url 'logout' %}" class="logout">Log out</a>
+    </div>
+  </header>
+  <main>
+    <div class="eyebrow">Authenticated Account</div>
+    <h1>Your profile</h1>
+    <section class="profile-card">
+      <div class="profile-header">
+        <div class="avatar">{{ account.name|default:account.email|slice:":1"|upper }}</div>
+        <div class="profile-header-info">
+          <strong>{{ account.name|default:account.email }}</strong>
+          <span>{{ account.email }}</span>
+          <div><span class="role-badge">{{ account.get_role_display }}</span></div>
+        </div>
+      </div>
+      <dl>
+        <dt>Full name</dt>
+        <dd>{{ account.name|default:"Not specified" }}</dd>
+        <dt>Registered ID</dt>
+        <dd class="id">{{ account.registered_id }}</dd>
+        <dt>Email</dt>
+        <dd>{{ account.email }}</dd>
+        <dt>Mobile number</dt>
+        <dd>+91 {{ account.phone }}</dd>
+        <dt>Account role</dt>
+        <dd>{{ account.get_role_display }}</dd>
+        <dt>Member since</dt>
+        <dd>{{ account.created_at|date:"d M Y" }}</dd>
+      </dl>
+      <div class="actions">
+        {% if account.role == 'farmer' %}
+          <a class="btn btn-primary" href="{% url 'farmer_dashboard' %}">Farmer Dashboard</a>
+        {% elif account.role == 'admin' %}
+          <a class="btn btn-primary" href="{% url 'admin_dashboard' %}">Admin Dashboard</a>
+        {% elif account.role == 'delivery' %}
+          <a class="btn btn-primary" href="{% url 'delivery_dashboard' %}">Delivery Dashboard</a>
+        {% else %}
+          <a class="btn btn-primary" href="{% url 'marketplace' %}">Go to marketplace</a>
+        {% endif %}
+        <a class="btn btn-secondary" href="{% url 'home' %}">Back home</a>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
