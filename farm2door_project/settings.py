@@ -37,15 +37,23 @@ load_dotenv(BASE_DIR / '.env')
 # See https://docs.djangoproject.com/en/6.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-7%2wopp@e_#%0!mo$9_xo45swg0frl%u%h(f$86n^&177u)b=d'
+SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-local-development-key')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
 
 ALLOWED_HOSTS = [
-    'farm2door-4zmx.onrender.com',
-    'localhost',
-    '127.0.0.1',
+    host.strip()
+    for host in os.getenv(
+        'ALLOWED_HOSTS',
+        'farm2door-4zmx.onrender.com,localhost,127.0.0.1',
+    ).split(',')
+    if host.strip()
+]
+CSRF_TRUSTED_ORIGINS = [
+    f'https://{host}'
+    for host in ALLOWED_HOSTS
+    if host not in {'localhost', '127.0.0.1'}
 ]
 
 
@@ -65,6 +73,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -162,14 +171,40 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.1/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_DIRS = [BASE_DIR / 'static'] if (BASE_DIR / 'static').exists() else []
 
 
 # Email
 # https://docs.djangoproject.com/en/6.1/topics/email/#topic-email-configuration
 
-MAILERS = {
-    'default': {
-        'BACKEND': 'django.core.mail.backends.console.EmailBackend',
-    },
-}
+if DEBUG:
+    MAILERS = {
+        'default': {
+            'BACKEND': 'django.core.mail.backends.console.EmailBackend',
+        },
+    }
+else:
+    MAILERS = {
+        'default': {
+            'BACKEND': 'django.core.mail.backends.smtp.EmailBackend',
+            'HOST': os.getenv('EMAIL_HOST', ''),
+            'PORT': int(os.getenv('EMAIL_PORT', '587')),
+            'USERNAME': os.getenv('EMAIL_HOST_USER', ''),
+            'PASSWORD': os.getenv('EMAIL_HOST_PASSWORD', ''),
+            'USE_TLS': os.getenv('EMAIL_USE_TLS', 'true').lower() == 'true',
+            'DEFAULT_FROM_EMAIL': os.getenv(
+                'DEFAULT_FROM_EMAIL',
+                'no-reply@farm2door.app',
+            ),
+        },
+    }
+
+if not DEBUG:
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    SECURE_SSL_REDIRECT = True
+    SECURE_HSTS_SECONDS = 31536000
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
