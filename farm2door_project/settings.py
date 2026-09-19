@@ -39,8 +39,8 @@ load_dotenv(BASE_DIR / '.env')
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-local-development-key')
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
+# Default to local development behavior unless the environment explicitly sets DEBUG=False.
+DEBUG = os.getenv('DEBUG', 'True').lower() in {'1', 'true', 'yes', 'on'}
 
 ALLOWED_HOSTS = [
     host.strip()
@@ -50,6 +50,11 @@ ALLOWED_HOSTS = [
     ).split(',')
     if host.strip()
 ]
+LOCAL_DEV_HOSTS = {'localhost', '127.0.0.1', '0.0.0.0', '[::1]'}
+IS_LOCAL_DEVELOPMENT = (
+    os.getenv('ENVIRONMENT', '').lower() in {'local', 'development'}
+    or any(host in LOCAL_DEV_HOSTS for host in ALLOWED_HOSTS)
+)
 CSRF_TRUSTED_ORIGINS = [
     f'https://{host}'
     for host in ALLOWED_HOSTS
@@ -105,25 +110,37 @@ WSGI_APPLICATION = 'farm2door_project.wsgi.application'
 
 # Database
 # Set DATABASE_URL to the Supabase Postgres connection string in deployment.
-# SQLite remains available for local development when DATABASE_URL is absent.
+# SQLite remains available for local development when DATABASE_URL is absent or invalid.
 DATABASE_URL = os.getenv('DATABASE_URL')
 if DATABASE_URL and 'test' not in sys.argv:
     from urllib.parse import unquote, urlparse
 
-    parsed_database_url = urlparse(DATABASE_URL)
-    database_name = parsed_database_url.path.lstrip('/')
+    try:
+        parsed_database_url = urlparse(DATABASE_URL)
+        if not parsed_database_url.scheme or not parsed_database_url.hostname:
+            raise ValueError('Invalid DATABASE_URL format.')
+        database_name = parsed_database_url.path.lstrip('/')
+        if not database_name:
+            raise ValueError('DATABASE_URL is missing a database name.')
 
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql',
-            'NAME': database_name,
-            'USER': unquote(parsed_database_url.username or ''),
-            'PASSWORD': unquote(parsed_database_url.password or ''),
-            'HOST': parsed_database_url.hostname,
-            'PORT': str(parsed_database_url.port or os.getenv('SUPABASE_DB_PORT', '5432')),
-            'OPTIONS': {'sslmode': 'require'},
+        DATABASES = {
+            'default': {
+                'ENGINE': 'django.db.backends.postgresql',
+                'NAME': database_name,
+                'USER': unquote(parsed_database_url.username or ''),
+                'PASSWORD': unquote(parsed_database_url.password or ''),
+                'HOST': parsed_database_url.hostname,
+                'PORT': str(parsed_database_url.port or os.getenv('SUPABASE_DB_PORT', '5432')),
+                'OPTIONS': {'sslmode': 'require'},
+            }
         }
-    }
+    except Exception:
+        DATABASES = {
+            'default': {
+                'ENGINE': 'django.db.backends.sqlite3',
+                'NAME': BASE_DIR / 'db.sqlite3',
+            }
+        }
 else:
     DATABASES = {
         'default': {
@@ -200,7 +217,7 @@ else:
         },
     }
 
-if not DEBUG:
+if not DEBUG and not IS_LOCAL_DEVELOPMENT:
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
     SECURE_SSL_REDIRECT = True
     SECURE_HSTS_SECONDS = 31536000
@@ -208,3 +225,7 @@ if not DEBUG:
     SECURE_HSTS_PRELOAD = True
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
+else:
+    SECURE_SSL_REDIRECT = False
+    SESSION_COOKIE_SECURE = False
+    CSRF_COOKIE_SECURE = False

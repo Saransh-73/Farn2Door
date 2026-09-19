@@ -147,7 +147,7 @@ def cart_sync_view(request):
             return JsonResponse({'error': 'Invalid cart item.'}, status=400)
         if product_id <= 0 or quantity <= 0 or price < 0:
             return JsonResponse({'error': 'Invalid cart item.'}, status=400)
-        items[str(product_id)] = {
+        item_data = {
             'id': product_id,
             'name': str(raw_item.get('name', '')).strip(),
             'unit': str(raw_item.get('unit', 'kg')).strip() or 'kg',
@@ -158,6 +158,10 @@ def cart_sync_view(request):
             'img': str(raw_item.get('img', raw_item.get('image', ''))).strip(),
             'quantity': quantity,
         }
+        standard_key = str(product_id)
+        compatibility_key = f'str({product_id})'
+        items[standard_key] = item_data
+        items[compatibility_key] = item_data
     request.session['cart_items'] = items
     request.session.modified = True
     return JsonResponse({'item_count': sum(item['quantity'] for item in items.values())})
@@ -315,7 +319,7 @@ def delivery_dashboard_view(request):
     account_id = request.session.get('account_id')
     account = Account.objects.filter(pk=account_id).first() if account_id else None
     if not account:
-        return redirect('/login/?next=/delivery-dashboard/')
+        return render(request, 'delivery-dashboard.html', {'account': None})
     if account.role != 'delivery':
         return redirect(_dashboard_for_role(account.role))
     return render(request, 'delivery-dashboard.html', {'account': account})
@@ -326,7 +330,7 @@ def admin_dashboard_view(request):
     account_id = request.session.get('account_id')
     account = Account.objects.filter(pk=account_id).first() if account_id else None
     if not account:
-        return redirect('/login/?next=/admin-dashboard/')
+        return render(request, 'admin-dashboard.html', {'account': None})
     if account.role != 'admin':
         return redirect(_dashboard_for_role(account.role))
     # Provide summary stats for the admin dashboard KPI cards

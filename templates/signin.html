@@ -391,6 +391,14 @@ document.getElementById("sendOtpBtn").addEventListener("click", ()=>{
   setTimeout(()=> document.querySelector("#otpBoxes input").focus(), 350);
 });
 
+function getCsrfToken(){
+  const cookie = document.cookie.split('; ').find(row => row.startsWith('csrftoken='));
+  if (cookie) {
+    return decodeURIComponent(cookie.split('=')[1]);
+  }
+  return document.getElementById('csrfToken')?.value || '';
+}
+
 /* ========================= STEP 2: OTP ========================= */
 const otpBoxes = document.getElementById("otpBoxes");
 const otpInputs = [...otpBoxes.querySelectorAll("input")];
@@ -434,10 +442,22 @@ document.getElementById("verifyOtpBtn").addEventListener("click", ()=>{
     clearInterval(resendTimerHandle);
     fetch("{% url 'register' %}", {
       method: "POST",
-      headers: {"Content-Type": "application/json", "X-CSRFToken": document.getElementById("csrfToken").value},
+      credentials: "same-origin",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": getCsrfToken()
+      },
       body: JSON.stringify(registrationData)
     }).then(async response => {
-      const data = await response.json();
+      const rawText = await response.text();
+      let data = {};
+      if (rawText) {
+        try {
+          data = JSON.parse(rawText);
+        } catch (error) {
+          throw new Error("The server returned an unexpected response. Please refresh the page and try again.");
+        }
+      }
       if(!response.ok) throw new Error(data.error || "Could not create your account.");
       registrationData.redirect = data.redirect || '/profile/';
       goToStep(3);
